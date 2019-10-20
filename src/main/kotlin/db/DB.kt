@@ -13,7 +13,13 @@ object DB{
 
     val baseFile = userdir().child("data/")
 
+    val parsed = mutableMapOf<String, ObservableArrayList<*>>()
+
     inline fun <reified T : Observable> getList(key: String) : ObservableArrayList<T>{
+
+        if(parsed.containsKey(key)){
+            return parsed[key]!! as ObservableArrayList<T>
+        }
 
         val file = baseFile.child("$key.json")
 
@@ -29,6 +35,8 @@ object DB{
             val s = klaxon.toJsonString(list.collection)
             file.writeText(s)
         }
+
+        parsed.put(key, list)
 
         return list
 

@@ -98,7 +98,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
             event.getJDA().addEventListener(pinremover)
 
             //Create Info post
-            var m = newc.sendMessage(x.getInfoMarkup()).complete()
+            var m = newc.sendMessage("Placeholder").complete()
             x.infoMessage = m.idLong
 
             val tableMessage = newc.sendMessage("AttendanceTable").complete()
@@ -189,7 +189,6 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
         val value = Prompt("Neuer Wert?", event.channel, event.author).promptSync() //.setDelete(30000)
 
         TournamentCreator.parseFieldInto(tournament, value, TournamentCreator.getFieldFromLabel(parameter!!)!!)
-        TournamentInit.tournamentChanged(tournament)
 
         /*MessageTimer.deleteAfter(*/sendSync(event.channel, "Feld $parameter gesetzt auf $value")//, 30000);
 

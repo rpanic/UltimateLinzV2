@@ -1,20 +1,16 @@
 package main
 
 import db.DB
-import db.DBSingleton
+import db.Observable
 import db.TournamentListener
 import model.Tournament
 import model.TournamentInit
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
-import net.dv8tion.jda.api.events.Event
-import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
-import tournament.TournamentCreator
 import tournament.tournamentDbKey
-import java.util.*
 
 object Main{
 
@@ -34,15 +30,18 @@ object Main{
         jda.presence.setPresence(Activity.playing("${prefix}help"), false)
 
         jda.addEventListener(EventListener {
-            if(it is ReadyEvent)
+            if(it is ReadyEvent) {
                 println("API is ready")
+
+                //INIT
+                DB.getList<Tournament>(tournamentDbKey).list().forEach {
+                    TournamentInit.init(it)
+                }
+            }
+
         })
 
         jda.addEventListener(TournamentListener())
-
-        DB.getList<Tournament>(tournamentDbKey).list().forEach {
-            TournamentInit.init(it)
-        }
 
     }
 
@@ -51,20 +50,16 @@ object Main{
         val fallbacktoken = "NjI3NTgyMTUyMTI4NzI1MDE1.XY-wtQ.l5iLyVPVcD350-xudZHh8ygFG-4"
 
         val token = DB.getObject("token"){
-            Token("none")
+            Token(fallbacktoken)
         }
-
-        return if(token.token == "none"){
-            fallbacktoken
-        }else {
-            token.token
-        }
-
+        return token.token
     }
 
 }
 
-data class Token(val token: String) : DBSingleton()
+class Token(inital: String) : Observable(){
+    var token: String by observable(inital)
+}
 
 fun main(args: Array<String>) {
 

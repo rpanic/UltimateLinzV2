@@ -83,7 +83,7 @@ public class EmoteLimiter{
 
     private void manageBotReactions(Long... messages){
 
-        if(Main.isInDeveloperMode) {
+        if(Main.isInDeveloperMode && false) {
 
             Arrays.stream(messages).map(x -> c.retrieveMessageById(x).complete()).forEach(m -> {
 
@@ -173,6 +173,12 @@ public class EmoteLimiter{
         if(messages.contains(id)) {
 
             manageBotReactions(id);
+//            if(event.getTextChannel().retrieveMessageById(event.getMessageId()).complete()
+//                    .getReactions()
+//                    .stream()
+//                    .anyMatch(x -> x.retrieveUsers().complete().contains(event.getUser()))){
+//
+//            }
             listeners.forEach(x -> x.emoteRemove(event));
 
         }

@@ -1,6 +1,5 @@
 package main;
 
-import model.ReactionStateObserver;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 
@@ -24,10 +23,6 @@ public class AsciiMessageObserver {
     }
 
     public void answerChanged(String name, String choice){
-
-        if(choice == null || choice.equals("")){
-            return;
-        }
 
         table.data(name, choice);
 

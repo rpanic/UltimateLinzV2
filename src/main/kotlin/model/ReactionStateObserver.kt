@@ -30,13 +30,13 @@ class ReactionStateObserver(val message: Message, val limiter: EmoteLimiter) : S
         message.reactions
             .forEach {
                 val users = it.retrieveUsers().complete()
-                reactions[it.reactionEmote.emoteOrEmojiName()] = users.filterNotNull().toMutableList()
+                reactions[it.reactionEmote.emoteOrEmojiName()] = users.filterNotNull().filter { u -> !u.isBot }.toMutableList()
             }
 
 
         //Listener
         Main.jda.addEventListener(EventListener {
-            println("ReactionStateObserver: ${it.javaClass.name}")
+
             if (it is MessageReactionAddEvent && it.messageIdLong == message.idLong) {
 
                 val reactionEmoji = it.reactionEmote.emoteOrEmojiName()

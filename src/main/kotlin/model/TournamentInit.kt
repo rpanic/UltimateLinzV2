@@ -22,10 +22,6 @@ object TournamentInit{
         //Info & Table
         var newc = Main.jda.getTextChannelById(t.announcementChannel)
 
-        if(newc == null){
-            newc = Main.jda.getTextChannelById(t.announcementChannel)
-        }
-
         val infoM = newc!!.retrieveMessageById(t.infoMessage).complete()
 
         var limiter = EmoteLimiter(infoM)
@@ -80,6 +76,8 @@ object TournamentInit{
 
         limiter.start(eatingM.channel)
 
+        TournamentChangeObserver(t).all("") //TODO not the cleanest solution
+
 //        limiter.addEmoteListener(object: EmoteLimiter.EmoteListener{
 //
 //            val observer = observer
@@ -92,31 +90,6 @@ object TournamentInit{
 //                messageObserver.answerChanged(tableMessage.guild.getMemberById(e!!.user.idLong)!!.nickname, observer.getReactionByUser(e.user.idLong))
 //            }
 //        })
-
-    }
-
-    //TODO Change to Observer Pattern
-    fun tournamentChanged(t: Tournament){
-
-        DB.getList<Tournament>(tournamentDbKey).update(t)
-
-        val channel = Main.jda.getTextChannelById(t.announcementChannel)
-
-        if (channel != null) {
-            val message = channel.retrieveMessageById(t.infoMessage).complete()
-
-            if (message != null) {
-
-                message.editMessage(t.getInfoMarkup()).complete()
-
-            } else {
-                System.err.println("TournamentChangeListenere - Message not found")
-                Thread.dumpStack()
-            }
-
-        } else {
-            System.err.println("TournamentChangeListenere - Channel not found")
-        }
 
     }
 

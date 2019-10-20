@@ -26,6 +26,10 @@ public class AsciiTable <T> {
 
     public AsciiTable data(String infoData, T rowData){
 
+        if(rowData == null){
+            return data(Arrays.asList(infoData), null);
+        }
+
         if(columns.columns.stream().filter(x -> x.pk || x.infoColumn).count() == 1){
 
             List<T> multiplied = new ArrayList<>();
@@ -43,6 +47,11 @@ public class AsciiTable <T> {
     }
 
     public AsciiTable data(List<String> infoData, List<T> rowData){
+
+        if(rowData == null){
+            removeRowByPK(infoData);
+            return this;
+        }
 
         //Make lists mutable
         infoData = new ArrayList<>(infoData);
@@ -69,7 +78,7 @@ public class AsciiTable <T> {
 
         }
 
-        //Remove old and set new
+//      //Get index of PK column
         int pkIndex = -1;
         for(int i = 0 ; i < columns.columns.size() && pkIndex == -1 ; i++){
 
@@ -79,6 +88,7 @@ public class AsciiTable <T> {
 
         }
 
+        //Remove old and set new
         boolean set = false;
         for(int i = 0 ; i < data.size() ; i++){
 
@@ -94,6 +104,24 @@ public class AsciiTable <T> {
         }
 
         return this;
+    }
+
+    public void removeRowByPK(List<String> infoData){
+        int infoColumn = -1;
+        for(int i = 0 ; i < columns.columns.size() ; i++){
+            Column<T> column = columns.columns.get(i);
+            if(column.infoColumn){
+                infoColumn++;
+            }
+            if(column.pk){
+                for(int j = 0 ; j < data.size() ; j++){
+                    if(data.get(j).get(i).equals(infoData.get(infoColumn))){
+                        data.remove(j);
+                        return;
+                    }
+                }
+            }
+        }
     }
 
     public Message getTableMessage(){

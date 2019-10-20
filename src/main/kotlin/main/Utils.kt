@@ -52,7 +52,6 @@ fun <T, V> T.has(pred: T.() -> Boolean, default: V, function: T.() -> V): V {
     }
 }
 
-
 // ### Needs Apache Commons
 
 fun parseDateLazy(date: String) : Date{
