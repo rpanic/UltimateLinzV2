@@ -3,6 +3,8 @@ package main
 import db.DB
 import db.Observable
 import db.TournamentListener
+import model.GeneralAnnouncementChannel
+import model.GeneralAnnouncementChannelImposer
 import model.Tournament
 import model.TournamentInit
 import net.dv8tion.jda.api.JDA
@@ -32,6 +34,20 @@ object Main{
         jda.addEventListener(EventListener {
             if(it is ReadyEvent) {
                 println("API is ready")
+
+                val generalAnnouncementChannel = DB.getObject<GeneralAnnouncementChannel>("generalAnnouncementChannel"){
+                    val guild = jda.guilds[0]
+
+                    //todo Check if the channel already exists
+
+                    val channel = guild.createTextChannel("Turniere").complete()
+
+                    channel.manager.setParent(guild.getCategoriesByName("Verein", true)[0]).complete()
+
+                    GeneralAnnouncementChannel().apply { channelId = channel.idLong }
+                }
+
+                GeneralAnnouncementChannelImposer(generalAnnouncementChannel)
 
                 //INIT
                 DB.getList<Tournament>(tournamentDbKey).list().forEach {

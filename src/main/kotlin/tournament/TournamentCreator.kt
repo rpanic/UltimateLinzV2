@@ -108,7 +108,7 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
             "paymentDeadline",
             "uclink"
         )
-        val nonCreationFields = arrayOf("schedule", "playersinfo")
+        val nonCreationFields = arrayOf("schedule", "playersinfo", "comment")
         val translations = arrayOf(
             "name-Name des Turniers",
             "start-Start des Turniers",
@@ -122,7 +122,8 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
             "paymentdeadline-Deadline zur Teamfeezahlung",
             "link-Ultimate Central Link",
             "schedule-Schedule",
-            "playersinfo-Playersinfo"
+            "playersinfo-Playersinfo",
+            "comment-Freitext für zusätzliche Infos"
         )
 
         fun getFieldFromLabel(label: String): String? {

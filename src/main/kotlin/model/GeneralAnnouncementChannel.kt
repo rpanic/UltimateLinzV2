@@ -1,10 +1,11 @@
 package model
 
-import db.DBSingleton
+import db.Observable
 
-data class GeneralAnnouncementChannel(val channelId: Long, val tournamentMessages: List<Long>)
-    : DBSingleton() {
+class GeneralAnnouncementChannel()
+    : Observable() {
 
-
+    var channelId: Long by observable(-1)
+    val tournamentMessages: List<Long> by observable(mutableListOf())
 
 }

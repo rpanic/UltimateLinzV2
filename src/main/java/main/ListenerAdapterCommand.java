@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -38,11 +39,18 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
 
                     System.out.println("Message: " + event.getMessage().getContentDisplay() + " MessageId " + event.getMessageId());
                     lastMessage = event.getMessage();
-                    boolean b = command(event, msg);
+                    try {
+                        boolean b = command(event, msg);
 
-                    if(!b){
-                        //TODO Command not recognized
+                        if(!b){
+                            //TODO Command not recognized
+                        }
+                    } catch (Exception e){
+                        event.getChannel().sendMessage("Ein Fehler ist aufgetreten - bitte wende dich an Raphael").complete();
+                        event.getChannel().sendMessage(Stream.concat(Stream.of(e.getMessage()), Stream.of(e.getStackTrace())).limit(7).map(x -> x.toString()).reduce((x, y) -> x + "\n" + y).orElse("No stack trace")).complete();
                     }
+
+
 
                 }
             }
