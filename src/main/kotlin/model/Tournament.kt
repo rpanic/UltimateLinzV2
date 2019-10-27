@@ -1,5 +1,6 @@
 package model
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import db.Observable
 import java.text.SimpleDateFormat
 
@@ -26,10 +27,12 @@ class Tournament : Observable(){
 
     var infoMessage: Long           by observable(-1)
     var tableMessage: Long          by observable(-1)
+
+    var eatingEnabled: Boolean      by observable(false)
     var eatingMessage: Long         by observable(-1)
 
     override fun toString(): String {
-        return "Tournament(id=$id, name=$name, dateFrom=$dateFrom, dateTo=$dateTo, location=$location, format=$format, division=$division, teamFee=$teamFee, playersFee=$playersFee, registrationDeadline=$registrationDeadline, paymentDeadline=$paymentDeadline, schedule=$schedule, playersinfo=$playersinfo, ucLink=$ucLink, comment=$comment, announcementChannel=$announcementChannel, discussionChannel=$discussionChannel, infoMessage=$infoMessage, tableMessage=$tableMessage, eatingMessage=$eatingMessage)"
+        return "Tournament(id=$id, name=$name, dateFrom=$dateFrom, dateTo=$dateTo, location=$location, format=$format, division=$division, teamFee=$teamFee, playersFee=$playersFee, registrationDeadline=$registrationDeadline, paymentDeadline=$paymentDeadline, schedule=$schedule, playersinfo=$playersinfo, ucLink=$ucLink, comment=$comment, announcementChannel=$announcementChannel, discussionChannel=$discussionChannel, infoMessage=$infoMessage, tableMessage=$tableMessage, eatingMessage=$eatingMessage, eatingEnabled=$eatingEnabled)"
     }
 
 }

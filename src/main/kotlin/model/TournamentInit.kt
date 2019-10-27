@@ -61,22 +61,9 @@ object TournamentInit{
         })
         limiter.start(newc)
 
-        //Eating
+        initEating(t)
 
-        val eatingM = newc.retrieveMessageById(t.eatingMessage).complete()
-
-        limiter = EmoteLimiter(eatingM)
-            .setAllowedEmotes(listOf("meat", "veggie"))
-            .setDisplayAllowed(true)
-            .setLimitEmotes(true)
-            .setLimitReactions(true)
-
-        observer = ReactionStateObserver(eatingM, limiter)
-        observer.init()
-
-        limiter.start(eatingM.channel)
-
-        TournamentChangeObserver(t).all("") //TODO not the cleanest solution
+        TournamentChangeObserver(t).all(Tournament::announcementChannel, "") //TODO not the cleanest solution
 
 //        limiter.addEmoteListener(object: EmoteLimiter.EmoteListener{
 //
@@ -90,6 +77,29 @@ object TournamentInit{
 //                messageObserver.answerChanged(tableMessage.guild.getMemberById(e!!.user.idLong)!!.nickname, observer.getReactionByUser(e.user.idLong))
 //            }
 //        })
+
+    }
+
+    fun initEating(t: Tournament){
+
+        if(t.eatingEnabled){
+
+            var newc = Main.jda.getTextChannelById(t.announcementChannel)
+
+            val eatingM = newc!!.retrieveMessageById(t.eatingMessage).complete()
+
+            val limiter = EmoteLimiter(eatingM)
+                .setAllowedEmotes(listOf("meat", "veggie"))
+                .setDisplayAllowed(true)
+                .setLimitEmotes(true)
+                .setLimitReactions(true)
+
+            val observer = ReactionStateObserver(eatingM, limiter)
+            observer.init()
+
+            limiter.start(eatingM.channel)
+
+        }
 
     }
 

@@ -3,6 +3,7 @@ package model
 import db.ChangeObserver
 import main.Main
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
 import java.awt.Color
 import java.text.SimpleDateFormat
@@ -11,10 +12,37 @@ import kotlin.reflect.KProperty
 
 class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
-    fun all(new: Any){
+    fun eatingEnabled(new: Any){
+
+        if(new is Boolean){
+
+            val channel = Main.jda.getTextChannelById(t.announcementChannel)!!
+
+            if(new){
+
+                val eatingM = channel.sendMessage("Fleisch / Veggie").complete()
+                eatingM.pin().complete()
+                t.eatingMessage = eatingM.idLong
+
+                TournamentInit.initEating(t)
+
+            }else{
+
+                var message: Message? = null
+                if(t.eatingMessage > 0 && channel.retrieveMessageById(t.eatingMessage).complete().apply { message = this } != null){
+
+                    message!!.delete().complete()
+
+                }
+
+            }
+        }
+    }
+
+    fun all(prop: KProperty<*>, new: Any){
 
         //Update Info Message
-        println("Tournament ${t.name} changed")
+        println("Tournament ${t.name} changed ${prop.name} -> $new")
 
         val channel = Main.jda.getTextChannelById(t.announcementChannel)
 
@@ -27,12 +55,12 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 //                message.editMessage(buildEmbed()).complete()
 
             } else {
-                System.err.println("TournamentChangeListenere - Message not found")
+                System.err.println("TournamentChangeListener - Message not found")
                 Thread.dumpStack()
             }
 
         } else {
-            System.err.println("TournamentChangeListenere - Channel not found")
+            System.err.println("TournamentChangeListener - Channel not found")
         }
 
     }

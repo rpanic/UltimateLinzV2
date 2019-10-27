@@ -1,5 +1,6 @@
 package main
 
+import com.beust.klaxon.Json
 import db.DB
 import db.Observable
 import db.TournamentListener
@@ -73,13 +74,16 @@ object Main{
 
 }
 
-class Token(inital: String) : Observable(){
-    var token: String by observable(inital)
+class Token() : Observable(){
+
+    constructor(inital: String) : this(){
+        token = inital
+    }
+
+    var token: String by observable("")
 }
 
 fun main(args: Array<String>) {
-
-    DB.getList<Token>("Token")
 
     Main.main(args)
 }

@@ -9,10 +9,12 @@ import net.dv8tion.jda.api.entities.MessageReaction
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.Event
 import net.dv8tion.jda.api.events.GenericEvent
+import net.dv8tion.jda.api.events.message.MessageDeleteEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveAllEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
 import net.dv8tion.jda.api.hooks.EventListener
+import net.dv8tion.jda.api.hooks.ListenerAdapter
 import java.util.*
 
 class ReactionStateObserver(val message: Message, val limiter: EmoteLimiter) : StateObserver<GenericEvent>() {
@@ -35,7 +37,7 @@ class ReactionStateObserver(val message: Message, val limiter: EmoteLimiter) : S
 
 
         //Listener
-        Main.jda.addEventListener(EventListener {
+        val listener = EventListener {
 
             if (it is MessageReactionAddEvent && it.messageIdLong == message.idLong) {
 
@@ -66,7 +68,23 @@ class ReactionStateObserver(val message: Message, val limiter: EmoteLimiter) : S
 
             f(it)
 
-        })
+        }
+
+        val closeListener = object : ListenerAdapter() {
+
+            override fun onMessageDelete(event: MessageDeleteEvent) {
+
+                if (event.messageIdLong == message.idLong){
+
+                    Main.jda.removeEventListener(listener)
+                    Main.jda.removeEventListener(this)
+
+                }
+            }
+        }
+
+        Main.jda.addEventListener(listener)
+        Main.jda.addEventListener(closeListener)
 
         then {
 

@@ -26,7 +26,8 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
         "Playersfee?",
         "Registration Deadline?",
         "Payment Deadline?",
-        "Ultimate Central Link?"
+        "Ultimate Central Link?",
+        "Soll die Essensabstimmung sofort freigeschaltet werden?"
     )
     internal var values: Array<String?>
 
@@ -106,10 +107,11 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
             "playersFee",
             "registrationDeadline",
             "paymentDeadline",
-            "uclink"
+            "uclink",
+            "eatingEnabled"
         )
         val nonCreationFields = arrayOf("schedule", "playersinfo", "comment")
-        val translations = arrayOf(
+        val translations = arrayOf(  //Have to be "creationfields" first
             "name-Name des Turniers",
             "start-Start des Turniers",
             "end-Ende des Turniers",
@@ -121,6 +123,7 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
             "registrationdeadline-Deadline zur Registrierung",
             "paymentdeadline-Deadline zur Teamfeezahlung",
             "link-Ultimate Central Link",
+            "eating-Essensabstimmung freigeschaltet",
             "schedule-Schedule",
             "playersinfo-Playersinfo",
             "comment-Freitext für zusätzliche Infos"
@@ -158,6 +161,12 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
                             if(value != null){
                                 m.invoke(t, parseDateLazy(value).time)
                             }
+                        } else if (m.parameters[0].type.name == Boolean::class.javaPrimitiveType!!.name) {
+
+                            if(value != null){
+                                m.invoke(t, value.toBoolean())
+                            }
+
                         } else {
                             m.invoke(t, value)
                         }

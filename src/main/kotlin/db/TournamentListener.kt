@@ -105,8 +105,11 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
             x.tableMessage = tableMessage.idLong
 
             //Create eating message
-            m = newc.sendMessage("Fleisch / Veggie").complete()
-            x.eatingMessage = m.idLong
+            if(x.eatingEnabled){
+                val eatingM = newc.sendMessage("Fleisch / Veggie").complete()
+                x.eatingMessage = eatingM.idLong
+                eatingM.pin().complete()
+            }
 
             m.pin().complete() //Pin here, so the Info Message appears on the top
 
