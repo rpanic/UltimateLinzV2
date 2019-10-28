@@ -1,6 +1,5 @@
 package main
 
-import com.beust.klaxon.Json
 import db.DB
 import db.Observable
 import db.TournamentListener

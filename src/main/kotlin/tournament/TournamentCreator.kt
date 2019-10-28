@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.PrivateChannel
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import org.apache.commons.lang3.StringUtils.startsWith
 
 import java.lang.reflect.InvocationTargetException
 import java.text.ParseException
@@ -249,7 +250,20 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
                         } else if (m.parameters[0].type.name == Boolean::class.javaPrimitiveType!!.name) {
 
                             if(value != null){
-                                m.invoke(t, value.toBoolean())
+                                val booleaned = value.run {
+                                    when {
+                                        startsWith("y") -> true
+                                        startsWith("j") -> true
+                                        startsWith("t") -> true
+                                        startsWith("n") -> false
+                                        startsWith("f") -> false
+                                        else -> null
+                                    }
+                                }
+                                if(booleaned != null)
+                                    m.invoke(t, booleaned)
+                                else
+                                    throw java.lang.IllegalArgumentException("$value ist kein valider Ja / Nein Ausdruck")
                             }
 
                         } else {
