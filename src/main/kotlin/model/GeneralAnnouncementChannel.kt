@@ -10,7 +10,7 @@ class GeneralAnnouncementChannel()
     var tournamentMessages: MutableList<Long> by observable(mutableListOf())
 
     @Json(ignored = true)
-    private var change: Int by observable(0)
+    var change: Int by observable(0)
 
     fun addMessage(id: Long){
         tournamentMessages.add(id)

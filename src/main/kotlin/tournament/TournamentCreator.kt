@@ -3,13 +3,19 @@ package tournament
 import db.DB
 import main.parseDateLazy
 import model.Tournament
+import model.TournamentInit
+import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.PrivateChannel
+import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 
 import java.lang.reflect.InvocationTargetException
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.util.ArrayList
 
 const val tournamentDbKey = "tournaments"
 
@@ -33,18 +39,97 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
 
     internal var position = 0
 
-    internal var consumer: (Tournament) -> Unit = {}
-
     init {
         this.values = arrayOfNulls(arr.size)
     }
 
-    fun create(consumer: (Tournament) -> Unit) {
-        this.consumer = consumer
+    fun create() {
         channel.jda.addEventListener(this)
         nextQuestion()
     }
 
+    fun createAction(guild: Guild, t: Tournament) {
+
+        val c = guild.getCategoriesByName("Turniere", true).get(0)
+        val channels = c.getChannels()
+        val last = if (channels.size > 0) channels.get(channels.size - 1).getPosition() else 0
+
+        val newc = c.createTextChannel(t.name!!).complete() as TextChannel
+
+        //Permissions
+
+        Thread {
+
+            try {
+                Thread.sleep(12000L)
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+
+            val roles = guild.getRolesByName("Vereinsmitglied", true)
+            println(roles.toString())
+            if (roles.size > 0) {
+
+                val permissions = ArrayList<Permission>(
+                    listOf(
+                        Permission.MESSAGE_ADD_REACTION,
+                        Permission.VIEW_CHANNEL,
+                        Permission.MESSAGE_WRITE,
+                        Permission.MESSAGE_READ,
+                        Permission.MESSAGE_TTS,
+                        Permission.MESSAGE_EMBED_LINKS,
+                        Permission.MESSAGE_ATTACH_FILES,
+                        Permission.MESSAGE_EXT_EMOJI
+                    )
+                )
+
+                val raw = Permission.getRaw(permissions)
+
+                roles.forEach { y ->
+
+                    newc.manager.putPermissionOverride(y, raw, 0).complete()
+
+                }
+            }
+        }.start()
+
+        //Give the bot the power he deserves
+        val bot = guild.getRolesByName("Bot", true).stream().findFirst().orElse(null)
+        if (bot != null) {
+            newc.manager.putPermissionOverride(
+                bot,
+                Permission.ALL_CHANNEL_PERMISSIONS or Permission.ALL_TEXT_PERMISSIONS,
+                0
+            ).complete()
+        }
+
+        val pinremover = PinMessageRemoveListener(newc)
+
+        guild.jda.addEventListener(pinremover)
+
+        //Create Info post
+        var m = newc.sendMessage("Placeholder").complete()
+        t.infoMessage = m.idLong
+
+        val tableMessage = newc.sendMessage("AttendanceTable").complete()
+        t.tableMessage = tableMessage.idLong
+
+        //Create eating message
+        if (t.eatingEnabled) {
+            val eatingM = newc.sendMessage("Fleisch / Veggie").complete()
+            t.eatingMessage = eatingM.idLong
+            eatingM.pin().complete()
+        }
+
+        m.pin().complete() //Pin here, so the Info Message appears on the top
+
+        t.announcementChannel = newc.idLong
+
+        newc.guild.modifyTextChannelPositions().selectPosition(newc).moveTo(last + 1);
+
+        TournamentInit.init(t)
+
+    }
 
     fun nextQuestion() {
 
@@ -69,7 +154,7 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
 
             t.id = DB.getList<Tournament>(tournamentDbKey).list().map{ x -> x.id}.max() ?: -1 + 1;
 
-            consumer(t)
+            createAction(channel.jda.guilds[0], t)
 
             DB.getList<Tournament>(tournamentDbKey).add(t)
 

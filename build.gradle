@@ -7,6 +7,12 @@ version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
+allprojects {
+    repositories {
+        maven { url "https://jitpack.io" }
+    }
+}
+
 repositories {
     mavenCentral()
     jcenter()
@@ -15,9 +21,9 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation 'com.github.rpanic:ImposterDB:-SNAPSHOT'
+    implementation 'com.github.rpanic:ImposterDB:f4f77faa18'
 //    implementation 'com.jessecorbett:diskord-jvm:1.4.1'
-    implementation 'com.beust:klaxon:5.0.1'
+    implementation 'com.beust:klaxon:5.2'
     implementation 'net.dv8tion:JDA:4.0.0_39'
     implementation 'com.jagrosh:jda-utilities:2.1'
 //    implementation 'com.rubiconproject.oss:jchronic:0.2.8'

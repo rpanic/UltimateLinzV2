@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter
 
 class PinMessageRemoveListener(internal var channel: TextChannel) : ListenerAdapter() {
 
-    var count = 0
+    var count = Int.MAX_VALUE
     var runnable: () -> Unit = {}
 
     override fun onMessageReceived(event: MessageReceivedEvent) {

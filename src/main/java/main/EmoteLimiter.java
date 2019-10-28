@@ -3,20 +3,13 @@ package main;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javafx.util.Pair;
+import kotlin.Pair;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
-
-import javax.annotation.Nonnull;
 
 public class EmoteLimiter{
 
@@ -99,11 +92,11 @@ public class EmoteLimiter{
 
                 User bot = m.getJDA().getSelfUser();
 
-                if (botReactionsActive && sums.stream().allMatch(x -> x.getValue() > 1)) {
+                if (botReactionsActive && sums.stream().allMatch(x -> x.getSecond() > 1)) {
 
                     m.getReactions().forEach(messageReaction -> messageReaction.removeReaction(bot).complete());
 
-                } else if (!botReactionsActive && sums.stream().anyMatch(x -> x.getValue() < 2)) {
+                } else if (!botReactionsActive && sums.stream().anyMatch(x -> x.getSecond() < 2)) {
 
                     allowedEmotes.forEach(s -> m.addReaction(s).complete());
 
