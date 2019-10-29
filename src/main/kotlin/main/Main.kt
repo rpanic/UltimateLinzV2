@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import tournament.tournamentDbKey
+import java.io.FileNotFoundException
 
 object Main{
 
@@ -63,10 +64,8 @@ object Main{
 
     private fun getToken(): String {
 
-        val fallbacktoken = "NjI3NTgyMTUyMTI4NzI1MDE1.XY-wtQ.l5iLyVPVcD350-xudZHh8ygFG-4"
-
-        val token = DB.getObject("token"){
-            Token(fallbacktoken)
+        val token = DB.getObject<Token>("token"){
+            throw FileNotFoundException("token.json not supplied in directory data/. Make sure you set a Bot-Token before you start the Bot")
         }
         return token.token
     }
