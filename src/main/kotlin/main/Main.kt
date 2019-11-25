@@ -3,6 +3,7 @@ package main
 import db.DB
 import db.Observable
 import db.TournamentListener
+import json.JsonBackend
 import model.GeneralAnnouncementChannel
 import model.GeneralAnnouncementChannelImposer
 import model.Tournament
@@ -13,6 +14,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import tournament.tournamentDbKey
+import watch.WatchListenerAdapter
 import java.io.FileNotFoundException
 
 object Main{
@@ -24,6 +26,8 @@ object Main{
     var isInDeveloperMode = true
 
     fun main(args: Array<String>) {
+
+        DB.primaryBackend = JsonBackend()
 
         prefix = if (isInDeveloperMode) "?" else "!"
 
@@ -59,6 +63,7 @@ object Main{
         })
 
         jda.addEventListener(TournamentListener())
+        jda.addEventListener(WatchListenerAdapter())
 
     }
 

@@ -17,6 +17,8 @@ import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import java.util.*
 
+typealias ReactionStateEvent = (Boolean, String, User) -> Unit
+
 class ReactionStateObserver(val message: Message, val limiter: EmoteLimiter) : StateObserver<GenericEvent>() {
 
     private val reactions = mutableMapOf<String, MutableList<User>>()
@@ -25,6 +27,8 @@ class ReactionStateObserver(val message: Message, val limiter: EmoteLimiter) : S
         reactions.entries.firstOrNull { it.value.any { it.idLong == id } }?.key
 
     fun getReactions() = reactions
+
+    val listeners = mutableListOf<ReactionStateEvent>()
 
     override fun trigger(f: (GenericEvent) -> Unit) {
 
@@ -49,6 +53,8 @@ class ReactionStateObserver(val message: Message, val limiter: EmoteLimiter) : S
                     reactions[reactionEmoji] = mutableListOf(it.user)
                 }
 
+                listeners.forEach { x -> x(true, reactionEmoji, it.user) }
+
             } else if (it is MessageReactionRemoveEvent && it.messageIdLong == message.idLong) {
 
                 val reactionEmoji = it.reactionEmote.emoteOrEmojiName()
@@ -59,6 +65,8 @@ class ReactionStateObserver(val message: Message, val limiter: EmoteLimiter) : S
                         reactions.remove(reactionEmoji)
                     }
                 }
+
+                listeners.forEach { x -> x(false, reactionEmoji, it.user) }
 
             } else if (it is MessageReactionRemoveAllEvent && it.messageIdLong == message.idLong) {
 
