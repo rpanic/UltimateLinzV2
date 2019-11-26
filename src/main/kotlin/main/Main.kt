@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import tournament.tournamentDbKey
+import watch.LogonStatisticsListenerAdapter
 import watch.WatchListenerAdapter
 import java.io.FileNotFoundException
 
@@ -64,6 +65,7 @@ object Main{
 
         jda.addEventListener(TournamentListener())
         jda.addEventListener(WatchListenerAdapter())
+        jda.addEventListener(LogonStatisticsListenerAdapter())
 
     }
 

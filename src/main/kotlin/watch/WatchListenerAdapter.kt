@@ -22,7 +22,7 @@ class WatchListenerAdapter : ListenerAdapterCommand("watch"){
     fun off(event: MessageReceivedEvent, msg: Array<String>){
 
         watchers.remove(watchers.find { it.id == event.author.idLong })
-        
+
         event.channel.sendMessage("Watching turned off").complete()
 
     }
