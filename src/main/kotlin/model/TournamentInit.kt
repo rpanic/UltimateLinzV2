@@ -65,6 +65,8 @@ object TournamentInit{
 
         initEating(t)
 
+
+
         TournamentChangeObserver(t).all(Tournament::announcementChannel, "") //TODO not the cleanest solution
 
 //        limiter.addEmoteListener(object: EmoteLimiter.EmoteListener{

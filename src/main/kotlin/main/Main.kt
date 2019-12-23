@@ -11,6 +11,7 @@ import model.TournamentInit
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import tournament.tournamentDbKey
@@ -22,9 +23,13 @@ object Main{
 
     lateinit var jda: JDA
 
+    lateinit var guild: Guild
+
     var prefix: String? = null
     @JvmField
     var isInDeveloperMode = true
+
+    lateinit var generalAnnouncementChannel: GeneralAnnouncementChannel
 
     fun main(args: Array<String>) {
 
@@ -39,9 +44,10 @@ object Main{
 
         jda.addEventListener(EventListener {
             if(it is ReadyEvent) {
+
                 println("API is ready")
 
-                val generalAnnouncementChannel = DB.getObject<GeneralAnnouncementChannel>("generalAnnouncementChannel"){
+                generalAnnouncementChannel = DB.getObject("generalAnnouncementChannel"){
                     val guild = jda.guilds[0]
 
                     //todo Check if the channel already exists

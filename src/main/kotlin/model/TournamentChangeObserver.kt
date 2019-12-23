@@ -1,8 +1,11 @@
 package model
 
 import db.ChangeObserver
+import db.DB
 import main.Main
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.MessageBuilder
+import net.dv8tion.jda.api.entities.IMentionable
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
 import java.awt.Color
@@ -11,6 +14,17 @@ import java.time.Instant
 import kotlin.reflect.KProperty
 
 class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
+
+    init {
+
+        if(t.generalAnnouncementChannelMessage == -1L) {
+            val msg = Main.jda.getTextChannelById(Main.generalAnnouncementChannel.channelId)!!.sendMessage(buildGeneralInfoMessage())?.complete()
+            if (msg != null) {
+                t.generalAnnouncementChannelMessage = msg.idLong
+                Main.generalAnnouncementChannel.tournamentMessages.add(msg.idLong)
+            }
+        }
+    }
 
     fun eatingEnabled(new: Any){
 
@@ -63,6 +77,8 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
             System.err.println("TournamentChangeListener - Channel not found")
         }
 
+
+
     }
 
     private fun buildInfoMessage(): String {
@@ -75,10 +91,8 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
                 "Datum" to dateformat.format(dateFrom) + if(dateFrom != dateTo) "-"+dateformat.format(dateTo) else "",
                 "Ort" to location,
                 "Format" to "$format $division",
-                "Teamfee" to teamFee,
                 "Playersfee" to playersFee,
                 "Deadline Anmeldung" to dateformat.format(registrationDeadline),
-                "Deadline Zahlung" to dateformat.format(paymentDeadline),
                 "" to ""
             )
 
@@ -101,6 +115,16 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
         }
 
         //TODO Include Image from UltimateCentral automatically
+    }
+
+    private fun buildGeneralInfoMessage(): Message {
+
+        return MessageBuilder()
+            .append(".\n")
+            .append(Main.jda.getTextChannelById(t.announcementChannel) as IMentionable)
+            .append("\n" + buildInfoMessage() + "\n")
+            .build()
+
     }
 
     private fun buildEmbed(): MessageEmbed {
