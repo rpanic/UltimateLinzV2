@@ -7,18 +7,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-
-import javax.annotation.Nonnull;
 
 public abstract class ListenerAdapterCommand extends ListenerAdapter{
 
     protected String cmd;
-    static String cmdPrefix = "/";
+    static String cmdPrefix = Main.INSTANCE.getPrefix();
     Message lastMessage;
 
     public ListenerAdapterCommand(String commandString) {

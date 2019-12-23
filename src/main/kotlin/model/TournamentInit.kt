@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
 import tournament.tournamentDbKey
 import net.dv8tion.jda.api.entities.TextChannel
-
+import watch.linkWatchToReaction
 
 
 object TournamentInit{
@@ -32,6 +32,8 @@ object TournamentInit{
 
         var observer = ReactionStateObserver(infoM, limiter)
         observer.init()
+
+        linkWatchToReaction(observer)
 
         val tableMessage = newc.retrieveMessageById(t.tableMessage).complete()
 
@@ -62,6 +64,8 @@ object TournamentInit{
         limiter.start(newc)
 
         initEating(t)
+
+
 
         TournamentChangeObserver(t).all(Tournament::announcementChannel, "") //TODO not the cleanest solution
 

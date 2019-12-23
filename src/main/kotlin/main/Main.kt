@@ -3,6 +3,7 @@ package main
 import db.DB
 import db.Observable
 import db.TournamentListener
+import json.JsonBackend
 import model.GeneralAnnouncementChannel
 import model.GeneralAnnouncementChannelImposer
 import model.Tournament
@@ -10,20 +11,29 @@ import model.TournamentInit
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import tournament.tournamentDbKey
+import watch.LogonStatisticsListenerAdapter
+import watch.WatchListenerAdapter
 import java.io.FileNotFoundException
 
 object Main{
 
     lateinit var jda: JDA
 
+    lateinit var guild: Guild
+
     var prefix: String? = null
     @JvmField
     var isInDeveloperMode = true
 
+    lateinit var generalAnnouncementChannel: GeneralAnnouncementChannel
+
     fun main(args: Array<String>) {
+
+        DB.primaryBackend = JsonBackend()
 
         prefix = if (isInDeveloperMode) "?" else "!"
 
@@ -34,9 +44,10 @@ object Main{
 
         jda.addEventListener(EventListener {
             if(it is ReadyEvent) {
+
                 println("API is ready")
 
-                val generalAnnouncementChannel = DB.getObject<GeneralAnnouncementChannel>("generalAnnouncementChannel"){
+                generalAnnouncementChannel = DB.getObject("generalAnnouncementChannel"){
                     val guild = jda.guilds[0]
 
                     //todo Check if the channel already exists
@@ -59,6 +70,8 @@ object Main{
         })
 
         jda.addEventListener(TournamentListener())
+        jda.addEventListener(WatchListenerAdapter())
+        jda.addEventListener(LogonStatisticsListenerAdapter())
 
     }
 
