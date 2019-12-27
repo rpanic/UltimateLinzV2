@@ -39,6 +39,10 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
     @Permissioned("Vorstand", "Moderator")
     @Blocking
+    fun edit(event: MessageReceivedEvent, msg: Array<String>) = editinfo(event, msg)
+
+    @Permissioned("Vorstand", "Moderator")
+    @Blocking
     fun editinfo(event: MessageReceivedEvent, msg: Array<String>) {
 
         //TODO Argument 2 und 3 funktionieren nicht richtig

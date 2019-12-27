@@ -53,6 +53,14 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
         }
     }
 
+    fun status(new: Any){
+
+        //Alle Teilnehmer benachrichtigen
+
+        
+
+    }
+
     fun all(prop: KProperty<*>, new: Any){
 
         //Update Info Message
@@ -88,6 +96,7 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
         return t.run {
 
             val fields = mutableMapOf(
+                "Status" to status,
                 "Datum" to dateformat.format(dateFrom) + if(dateFrom != dateTo) "-"+dateformat.format(dateTo) else "",
                 "Ort" to location,
                 "Format" to "$format $division",

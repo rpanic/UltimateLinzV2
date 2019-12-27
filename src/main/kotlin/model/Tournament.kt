@@ -33,8 +33,10 @@ class Tournament : Observable(){
 
     var generalAnnouncementChannelMessage: Long by observable(-1)
 
+    var status: TournamentStatus    by observable(TournamentStatus.OPEN)
+
     override fun toString(): String {
-        return "Tournament(id=$id, name=$name, dateFrom=$dateFrom, dateTo=$dateTo, location=$location, format=$format, division=$division, teamFee=$teamFee, playersFee=$playersFee, registrationDeadline=$registrationDeadline, paymentDeadline=$paymentDeadline, schedule=$schedule, playersinfo=$playersinfo, ucLink=$ucLink, comment=$comment, announcementChannel=$announcementChannel, discussionChannel=$discussionChannel, infoMessage=$infoMessage, tableMessage=$tableMessage, eatingMessage=$eatingMessage, eatingEnabled=$eatingEnabled)"
+        return "Tournament(id=$id, name=$name, dateFrom=$dateFrom, dateTo=$dateTo, location=$location, format=$format, division=$division, teamFee=$teamFee, playersFee=$playersFee, registrationDeadline=$registrationDeadline, paymentDeadline=$paymentDeadline, schedule=$schedule, playersinfo=$playersinfo, ucLink=$ucLink, comment=$comment, announcementChannel=$announcementChannel, discussionChannel=$discussionChannel, infoMessage=$infoMessage, tableMessage=$tableMessage, eatingMessage=$eatingMessage, eatingEnabled=$eatingEnabled, status=$status)"
     }
 
 }
