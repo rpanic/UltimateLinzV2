@@ -2,6 +2,8 @@ package model
 
 import db.ChangeObserver
 import db.DB
+import helper.SimpleEmoteLimiter
+import main.EmoteLimiter
 import main.Main
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.MessageBuilder
@@ -14,6 +16,8 @@ import java.time.Instant
 import kotlin.reflect.KProperty
 
 class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
+
+    lateinit var participationEmoteLimiter: SimpleEmoteLimiter
 
     init {
 
@@ -38,7 +42,7 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
                 eatingM.pin().complete()
                 t.eatingMessage = eatingM.idLong
 
-                TournamentInit.initEating(t)
+                initEating(t)
 
             }else{
 
@@ -57,6 +61,10 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
         //Alle Teilnehmer benachrichtigen
 
+        val status = new as? TournamentStatus
+        if(status == TournamentStatus.SIGNED_UP) {
+
+        }
         
 
     }
@@ -87,6 +95,28 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
 
 
+    }
+
+    fun initEating(t: Tournament){
+
+        if(t.eatingEnabled){
+
+            var newc = Main.jda.getTextChannelById(t.announcementChannel)
+
+            val eatingM = newc!!.retrieveMessageById(t.eatingMessage).complete()
+
+            val limiter = EmoteLimiter(eatingM)
+                .setAllowedEmotes(listOf("meat", "veggie"))
+                .setDisplayAllowed(true)
+                .setLimitEmotes(true)
+                .setLimitReactions(true)
+
+            val observer = ReactionStateObserver(eatingM, limiter)
+            observer.init()
+
+            limiter.start(eatingM.channel)
+
+        }
     }
 
     private fun buildInfoMessage(): String {

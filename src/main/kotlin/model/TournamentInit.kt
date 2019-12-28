@@ -1,6 +1,7 @@
 package model
 
 import db.DB
+import helper.SimpleEmoteLimiter
 import main.AsciiMessageObserver
 import main.EmoteLimiter
 import main.Main
@@ -24,11 +25,10 @@ object TournamentInit{
 
         val infoM = newc!!.retrieveMessageById(t.infoMessage).complete()
 
-        var limiter = EmoteLimiter(infoM)
-            .setAllowedEmotes(listOf("in", "out"))
-            .setDisplayAllowed(true)
-            .setLimitEmotes(true)
-            .setLimitReactions(true)
+        var limiter = SimpleEmoteLimiter(infoM)
+
+        val emotes = Main.jda.emotes.map { Pair(it.name, it) }.toMap()
+        limiter.emotes = listOfNotNull(emotes["in"], emotes["out"])
 
         var observer = ReactionStateObserver(infoM, limiter)
         observer.init()
@@ -81,29 +81,6 @@ object TournamentInit{
 //                messageObserver.answerChanged(tableMessage.guild.getMemberById(e!!.user.idLong)!!.nickname, observer.getReactionByUser(e.user.idLong))
 //            }
 //        })
-
-    }
-
-    fun initEating(t: Tournament){
-
-        if(t.eatingEnabled){
-
-            var newc = Main.jda.getTextChannelById(t.announcementChannel)
-
-            val eatingM = newc!!.retrieveMessageById(t.eatingMessage).complete()
-
-            val limiter = EmoteLimiter(eatingM)
-                .setAllowedEmotes(listOf("meat", "veggie"))
-                .setDisplayAllowed(true)
-                .setLimitEmotes(true)
-                .setLimitReactions(true)
-
-            val observer = ReactionStateObserver(eatingM, limiter)
-            observer.init()
-
-            limiter.start(eatingM.channel)
-
-        }
 
     }
 

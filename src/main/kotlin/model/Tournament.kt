@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat
 class Tournament : Observable(){
 
     var id: Int                 by observable(0)
-    var name: String?           by observable(null)
+    var name: String            by observable("undefined")
     var dateFrom: Long          by observable(0)
     var dateTo: Long            by observable(0)
     var location: String?       by observable(null)

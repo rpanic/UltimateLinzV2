@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.entities.TextChannel
 import main.Prompt
 import java.util.*
 import model.Tournament
+import java.lang.IllegalArgumentException
 
 class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
@@ -45,17 +46,14 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
     @Blocking
     fun editinfo(event: MessageReceivedEvent, msg: Array<String>) {
 
-        //TODO Argument 2 und 3 funktionieren nicht richtig
-        val tournament = getTournament(msg, 3, event.message)
+        val (tournament, args) = parseDataWithTournament(msg).orElseThrow { ListenerAdapterCommandException("Tournament not found") }
 
-        if (tournament == null) {
-            send(event.channel, "Turnier nicht gefunden!")
-            return
-        }
+//        if (tournament == null) {
+//            send(event.channel, "Turnier nicht gefunden!")
+//            return
+//        }
 
         var parameter: String? = null
-
-//        deleteCommandAfter(30000)
 
         if (msg.size == 2) {
 
@@ -206,6 +204,32 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 //    fun activateEating(event: MessageReceivedEvent?, msg: Array<out String>?){
 //
 //    }
+
+    private fun parseDataWithTournament(args: Array<String>): Optional<Pair<Tournament, Array<String>>>{
+
+        val tournaments = DB.getList<Tournament>(tournamentDbKey).list()
+
+        var arg = args.maxBy { s -> tournaments.map { it.nameSimilarity(s) }.max() ?: 0 } ?: return Optional.empty()
+
+        var t = tournaments.maxBy { it.nameSimilarity(arg) } ?: return Optional.empty()
+
+        if(t.nameSimilarity(arg) < 4) return Optional.empty()
+
+        val args2 = args.toMutableList()
+        args2.remove(arg)
+
+        return Optional.of(Pair(t, args2.toTypedArray()))
+
+    }
+
+    private fun Tournament.nameSimilarity(s: String) : Int {
+
+        val s1 = this.name.toLowerCase()
+        val s2 = s.toLowerCase()
+
+        return s2.length * if(s1.contains(s2)) 1 else 0
+
+    }
 
     private fun getTournament(args: Array<String>, index: Int, msg: Message): Tournament? {
 

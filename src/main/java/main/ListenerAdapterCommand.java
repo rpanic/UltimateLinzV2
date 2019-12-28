@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import db.ListenerAdapterCommandException;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -89,6 +90,12 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
                                 try {
                                     m.invoke(this, event, tokens);
                                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                                    if(e instanceof InvocationTargetException){
+                                        Throwable cause = ((InvocationTargetException)e).getCause();
+                                        if(cause instanceof ListenerAdapterCommandException){
+                                            send(event.getChannel(), cause.getMessage());
+                                        }
+                                    }
                                     e.printStackTrace();
                                 }
                             }).start();
@@ -99,6 +106,8 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         //TODO, Command not found, help()
                         e.printStackTrace();
+                    } catch (Exception e){  //TODO Test if that works
+                        send(event.getChannel(), e.getMessage());
                     }
                 }else{
                     send(event.getChannel(), "Für diesen Befehl hast du nicht die nötigen Berechtigungen");
