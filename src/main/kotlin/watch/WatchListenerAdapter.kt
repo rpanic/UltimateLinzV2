@@ -12,10 +12,16 @@ class WatchListenerAdapter : ListenerAdapterCommand("watch"){
     @Permissioned("Vorstand", "Moderator")
     fun on(event: MessageReceivedEvent, msg: Array<String>){
 
-        watchers.add(Watcher(event.author.idLong))
+        val userId = event.author.idLong
 
-        event.channel.sendMessage("Watching turned on").complete()
+        val response = if(!watchers.any { it.id == userId }){
+            watchers.add(Watcher(userId))
+            "Watching turned on"
+        }else{
+            "Watching already turned on"
+        }
 
+        event.channel.sendMessage(response).complete()
     }
 
     @Permissioned("Vorstand", "Moderator")
@@ -27,8 +33,10 @@ class WatchListenerAdapter : ListenerAdapterCommand("watch"){
 
     }
 
-    override fun help(event: MessageReceivedEvent?, msg: Array<out String>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun help(event: MessageReceivedEvent, msg: Array<out String>?) {
+
+        event.channel.sendMessage("Options:\n-on\n-off").complete()
+
     }
 
 }

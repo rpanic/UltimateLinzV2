@@ -2,19 +2,14 @@ package db
 
 import main.*
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import model.TournamentInit
-import net.dv8tion.jda.api.Permission
-import tournament.PinMessageRemoveListener
 import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.entities.*
 import tournament.TournamentCreator
 import main.Permissioned
 import tournament.tournamentDbKey
-import net.dv8tion.jda.api.entities.TextChannel
 import main.Prompt
 import java.util.*
 import model.Tournament
-import java.lang.IllegalArgumentException
 
 class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
