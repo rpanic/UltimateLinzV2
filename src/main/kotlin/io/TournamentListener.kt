@@ -14,6 +14,7 @@ import model.Tournament
 import model.TournamentStatus
 import kotlin.contracts.contract
 
+@Help("Alle Commands zur Turnierinfo und -verwaltung")
 class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
     val padding = 12

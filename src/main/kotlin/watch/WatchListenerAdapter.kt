@@ -1,10 +1,12 @@
 package watch
 
 import db.DB
+import main.Help
 import main.ListenerAdapterCommand
 import main.Permissioned
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
+@Help("Schaltet Benachrichtungen, wenn jemand bei Turnieren abstimmt ein oder aus")
 class WatchListenerAdapter : ListenerAdapterCommand("watch"){
 
     var watchers = DB.getList<Watcher>("watchers")
@@ -32,11 +34,5 @@ class WatchListenerAdapter : ListenerAdapterCommand("watch"){
         event.channel.sendMessage("Watching turned off").complete()
 
     }
-
-//    override fun help(event: MessageReceivedEvent, msg: Array<out String>?) {
-//
-//        event.channel.sendMessage("Options:\n-on\n-off").complete()
-//
-//    }
 
 }

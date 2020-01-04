@@ -20,8 +20,6 @@ object Main{
 
     lateinit var jda: JDA
 
-    lateinit var guild: Guild
-
     var prefix: String? = null
     @JvmField
     var isInDeveloperMode = false
@@ -75,6 +73,7 @@ object Main{
         jda.addEventListener(TournamentListener())
         jda.addEventListener(WatchListenerAdapter())
         jda.addEventListener(LogonStatisticsListenerAdapter())
+        jda.addEventListener(HelpListenerAdapter())
 
     }
 
@@ -88,7 +87,7 @@ object Main{
 
 }
 
-class Token() : Observable(){
+class Token : Observable(){
     var token: String by observable("")
 }
 

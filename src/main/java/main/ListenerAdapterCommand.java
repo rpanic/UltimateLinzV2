@@ -134,13 +134,7 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
     protected String getHelp(Guild guild, User user){
         int padding = 12;
 
-        List<Role> roles = guild.getMember(user).getRoles();
-
-        List<Method> methods = Arrays.stream(getClass().getMethods())
-                .filter(x -> !x.getDeclaringClass().getName().equals(ListenerAdapterCommand.class.getName()) && ListenerAdapterCommand.class.isAssignableFrom(x.getDeclaringClass()))
-                .filter(x -> x.getParameterCount() > 0)
-                .filter(x -> x.getParameterTypes()[0].isAssignableFrom(MessageReceivedEvent.class))
-                .collect(Collectors.toList());
+        List<Method> methods = getCommandMethods(getClass(), guild, user);
 
         List<String> help = new ArrayList<>();
 
@@ -148,27 +142,38 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
 
         for(Method m : methods){
 
-            Permissioned permissioned = m.getAnnotation(Permissioned.class);
-            boolean permission;
-            if(permissioned != null) {
-                permission = roles.stream().anyMatch(x ->
-                        Arrays.stream(permissioned.value()).anyMatch(y -> y.equalsIgnoreCase(x.getName())));
-            }else{
-                permission = true;
-            }
-
-            if(permission) {
-                Help helpAnnotation = m.getAnnotation(Help.class);
-                String prefix = UtilsKt.padRight("-" + m.getName(), padding);
-                if (helpAnnotation != null) {
-                    help.add(prefix + helpAnnotation.value());
-                } else {
-                    help.add(prefix);
-                }
+            Help helpAnnotation = m.getAnnotation(Help.class);
+            String prefix = UtilsKt.padRight("-" + m.getName(), padding);
+            if (helpAnnotation != null) {
+                help.add(prefix + helpAnnotation.value());
+            } else {
+                help.add(prefix);
             }
         }
 
         return String.join("\n", help);
+    }
+
+    protected List<Method> getCommandMethods(Class<? extends ListenerAdapterCommand> clazz, Guild guild, User user){
+
+        List<Role> roles = guild.getMember(user).getRoles();
+
+        List<Method> methods = Arrays.stream(clazz.getMethods())
+                .filter(x -> !x.getDeclaringClass().getName().equals(ListenerAdapterCommand.class.getName()) && ListenerAdapterCommand.class.isAssignableFrom(x.getDeclaringClass()))
+                .filter(x -> x.getParameterCount() > 0)
+                .filter(x -> x.getParameterTypes()[0].isAssignableFrom(MessageReceivedEvent.class))
+                .filter(m -> {
+                    Permissioned permissioned = m.getAnnotation(Permissioned.class);
+                    if(permissioned != null) {
+                        return roles.stream().anyMatch(x ->
+                                Arrays.stream(permissioned.value()).anyMatch(y -> y.equalsIgnoreCase(x.getName())));
+                    }else{
+                        return true;
+                    }
+                })
+                .collect(Collectors.toList());
+
+        return methods;
     }
 
     public void send(MessageChannel c, String msg){
