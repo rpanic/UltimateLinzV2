@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
 import watch.linkWatchToLimiter
 import java.awt.Color
+import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.time.Instant
 import kotlin.reflect.KProperty
@@ -58,6 +59,8 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
         }
 
         this.all(Tournament::announcementChannel, "")
+
+        this.status(t.status)
 
     }
 
@@ -125,10 +128,26 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
         //Alle Teilnehmer benachrichtigen
 
         val status = new as? TournamentStatus
-        if(status == TournamentStatus.SIGNED_UP) {
+        val locked = if(status in listOf(
+                TournamentStatus.NOT_SIGNED_UP,
+                TournamentStatus.SPOT,
+                TournamentStatus.OVER,
+                TournamentStatus.NO_SPOT,
+                TournamentStatus.ARCHIVED)) {
 
+            true
+
+        }else if(status in listOf(
+                TournamentStatus.OPEN,
+                TournamentStatus.SIGNED_UP //TODO Checken, ob das so gewollt is
+            )){
+            false
+        }else{
+            throw IllegalStateException("This cannot be reached")
         }
-        
+
+        participationEmoteLimiter.locked = locked
+        eatingEmoteLimiter?.locked = locked
 
     }
 

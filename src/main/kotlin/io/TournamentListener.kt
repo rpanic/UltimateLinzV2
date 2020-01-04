@@ -195,6 +195,8 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
                         tournament.name = tournament.name + "-" + cal.get(Calendar.YEAR)
                         channel.manager.setName(tournament.name.replace(" ", "-")).complete()
 
+                        tournament.status = TournamentStatus.ARCHIVED
+
                         send(event.channel, "Tournament " + tournament.name + " archived!")
                     }
 
