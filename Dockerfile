@@ -1,12 +1,17 @@
-FROM gradle:4.10.3-jdk8 as builder
+FROM openjdk:8-jdk-slim as BUILD
 
-COPY --chown=gradle:gradle . /home/gradle/src
-WORKDIR /home/gradle/src
-VOLUME /var/lib/docker/gradle/cache
-RUN gradle build
+# Get gradle distribution
+COPY *.gradle gradle.* gradlew /src/
+COPY gradle /src/gradle
+WORKDIR /src
+RUN ./gradlew --version
+
+COPY . .
+ENV MAIN_CLASS_NAME=main.MainKt
+RUN ./gradlew --no-daemon jar
 
 FROM openjdk:8
-COPY --from=builder /home/gradle/src/build/libs/ultimatelinz-1.0.jar /app/ultimatelinz-1.0.jar
+COPY --from=builder /src/build/libs/ultimatelinz-1.0.jar /app/ultimatelinz-1.0.jar
 WORKDIR /app
 EXPOSE 90
 CMD ["java", "-jar", "ultimatelinz-1.0.jar"]
