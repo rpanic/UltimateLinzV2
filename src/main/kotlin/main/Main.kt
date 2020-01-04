@@ -89,11 +89,6 @@ object Main{
 }
 
 class Token() : Observable(){
-
-    constructor(inital: String) : this(){
-        token = inital
-    }
-
     var token: String by observable("")
 }
 

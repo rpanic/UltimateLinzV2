@@ -2,6 +2,7 @@ FROM gradle:4.10.3-jdk8 as builder
 
 COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
+VOLUME /var/lib/docker/gradle/cache
 RUN gradle build
 
 FROM openjdk:8
