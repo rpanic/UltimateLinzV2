@@ -3,19 +3,16 @@ package tournament
 import db.DB
 import main.parseDateLazy
 import model.Tournament
-import model.TournamentInit
-import net.dv8tion.jda.api.JDA
+import model.TournamentChangeObserver
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.PrivateChannel
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import org.apache.commons.lang3.StringUtils.startsWith
 
 import java.lang.reflect.InvocationTargetException
 import java.text.ParseException
-import java.text.SimpleDateFormat
 import java.util.ArrayList
 
 const val tournamentDbKey = "tournaments"
@@ -71,8 +68,7 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
             println(roles.toString())
             if (roles.size > 0) {
 
-                val permissions = ArrayList<Permission>(
-                    listOf(
+                val permissions = listOf(
                         Permission.MESSAGE_ADD_REACTION,
                         Permission.VIEW_CHANNEL,
                         Permission.MESSAGE_WRITE,
@@ -82,7 +78,6 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
                         Permission.MESSAGE_ATTACH_FILES,
                         Permission.MESSAGE_EXT_EMOJI
                     )
-                )
 
                 val raw = Permission.getRaw(permissions)
 
@@ -126,9 +121,9 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
 
         t.announcementChannel = newc.idLong
 
-        newc.guild.modifyTextChannelPositions().selectPosition(newc).moveTo(last + 1);
+        newc.guild.modifyTextChannelPositions().selectPosition(newc).moveTo(last + 1)
 
-        TournamentInit.init(t)
+        TournamentChangeObserver(t)
 
     }
 

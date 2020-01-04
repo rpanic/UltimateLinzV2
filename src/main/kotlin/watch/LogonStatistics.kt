@@ -3,10 +3,7 @@ package watch
 import db.ChangeObserver
 import db.DB
 import db.Observable
-import main.AsciiTable
-import main.ListenerAdapterCommand
-import main.Main
-import main.nickName
+import main.*
 import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.ChannelType
@@ -18,6 +15,7 @@ import java.util.*
 
 class Login(val user: Long, val time: Long, val status: String) : Observable()
 
+@Help("A static of last logins of users")
 class LogonStatisticsListenerAdapter : ListenerAdapterCommand("login"){
 
     override fun onUserUpdateOnlineStatus(event: UserUpdateOnlineStatusEvent) {
@@ -32,6 +30,8 @@ class LogonStatisticsListenerAdapter : ListenerAdapterCommand("login"){
 
     }
 
+    @Permissioned("Vorstand", "Moderator")
+    @Help("Lists all last logins")
     fun list(event: MessageReceivedEvent?, msg: Array<out String>?){
 
         if(event?.channelType == ChannelType.PRIVATE) {
@@ -75,10 +75,6 @@ class LogonStatisticsListenerAdapter : ListenerAdapterCommand("login"){
             }
         }
 
-    }
-
-    override fun help(event: MessageReceivedEvent?, msg: Array<out String>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
 }

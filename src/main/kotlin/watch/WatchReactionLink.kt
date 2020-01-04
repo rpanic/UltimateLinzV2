@@ -1,15 +1,17 @@
 package watch
 
 import db.DB
+import helper.EmoteListener
+import helper.SimpleEmoteLimiter
 import main.Main
 import main.nickName
-import model.ReactionStateObserver
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
 
-fun linkWatchToReaction(observer: ReactionStateObserver){
+fun linkWatchToLimiter(observer: SimpleEmoteLimiter){
 
-    observer.listeners.add { type, choice, user ->
-
-        if(type){
+    observer.addEmoteListener(object: EmoteListener{
+        override fun emoteAdd(e: MessageReactionAddEvent, limiter: SimpleEmoteLimiter) {
 
             val watchers = DB.getList<Watcher>("watchers")
             watchers.forEach {
@@ -17,7 +19,7 @@ fun linkWatchToReaction(observer: ReactionStateObserver){
                 if(watcherUser != null){
 
                     val tournament = observer.message.channel.name
-                    val message = "${user.nickName(Main.jda.guilds[0])} changed vote on Tournament $tournament to $choice"
+                    val message = "${e.user.nickName(Main.jda.guilds[0])} changed vote on Tournament $tournament to ${e.reactionEmote.emote.name}"
 
                     watcherUser.openPrivateChannel().complete().sendMessage(message).complete()
                 }
@@ -25,9 +27,7 @@ fun linkWatchToReaction(observer: ReactionStateObserver){
 
         }
 
-    }
-
-
-
-
+        override fun emoteRemove(e: MessageReactionRemoveEvent, limiter: SimpleEmoteLimiter) {
+        }
+    })
 }

@@ -2,10 +2,12 @@ package main;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.ListenerAdapterCommandException;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -52,8 +54,6 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
         }
     }
 
-    public abstract void help(MessageReceivedEvent event, String[] msg);
-
     private boolean command(MessageReceivedEvent event, String msg) {
 
         String[] tokens = msg.split(" ");
@@ -67,7 +67,7 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
 
             if(m.getName().equalsIgnoreCase(tokens[1])){
 
-                boolean hasPermission = false;
+                boolean hasPermission;
 
                 if(m.isAnnotationPresent(Permissioned.class)){
 
@@ -89,6 +89,12 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
                                 try {
                                     m.invoke(this, event, tokens);
                                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                                    if(e instanceof InvocationTargetException){
+                                        Throwable cause = e.getCause();
+                                        if(cause instanceof ListenerAdapterCommandException){
+                                            send(event.getChannel(), cause.getMessage());
+                                        }
+                                    }
                                     e.printStackTrace();
                                 }
                             }).start();
@@ -99,14 +105,70 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         //TODO, Command not found, help()
                         e.printStackTrace();
+                    } catch (Exception e){  //TODO Test if that works
+                        send(event.getChannel(), e.getMessage());
                     }
                 }else{
                     send(event.getChannel(), "Für diesen Befehl hast du nicht die nötigen Berechtigungen");
                 }
             }
         }
-//        deleteCommandAfter(5000);
         return false;
+    }
+
+    public void help(MessageReceivedEvent event, String[] msg){
+
+        MessageBuilder messageBuilder = new MessageBuilder();
+
+        Help helpAnnotation = getClass().getAnnotation(Help.class);
+        if(helpAnnotation != null){
+            messageBuilder.append("|\n");
+            messageBuilder.append(helpAnnotation.value());
+        }
+
+        messageBuilder.appendCodeBlock(getHelp(event.getJDA().getGuilds().get(0), event.getAuthor()), "");
+
+        send(event.getChannel(), messageBuilder.build());
+    }
+
+    protected String getHelp(Guild guild, User user){
+        int padding = 12;
+
+        List<Role> roles = guild.getMember(user).getRoles();
+
+        List<Method> methods = Arrays.stream(getClass().getMethods())
+                .filter(x -> !x.getDeclaringClass().getName().equals(ListenerAdapterCommand.class.getName()) && ListenerAdapterCommand.class.isAssignableFrom(x.getDeclaringClass()))
+                .filter(x -> x.getParameterCount() > 0)
+                .filter(x -> x.getParameterTypes()[0].isAssignableFrom(MessageReceivedEvent.class))
+                .collect(Collectors.toList());
+
+        List<String> help = new ArrayList<>();
+
+        Collections.sort(methods, Comparator.comparing(Method::getName));
+
+        for(Method m : methods){
+
+            Permissioned permissioned = m.getAnnotation(Permissioned.class);
+            boolean permission;
+            if(permissioned != null) {
+                permission = roles.stream().anyMatch(x ->
+                        Arrays.stream(permissioned.value()).anyMatch(y -> y.equalsIgnoreCase(x.getName())));
+            }else{
+                permission = true;
+            }
+
+            if(permission) {
+                Help helpAnnotation = m.getAnnotation(Help.class);
+                String prefix = UtilsKt.padRight(m.getName(), padding);
+                if (helpAnnotation != null) {
+                    help.add(prefix + helpAnnotation.value());
+                } else {
+                    help.add(prefix);
+                }
+            }
+        }
+
+        return String.join("\n", help);
     }
 
     public void send(MessageChannel c, String msg){

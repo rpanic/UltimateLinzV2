@@ -2,12 +2,9 @@ package main
 
 import db.DB
 import db.Observable
-import db.TournamentListener
+import io.TournamentListener
 import json.JsonBackend
-import model.GeneralAnnouncementChannel
-import model.GeneralAnnouncementChannelImposer
-import model.Tournament
-import model.TournamentInit
+import model.*
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
@@ -27,11 +24,17 @@ object Main{
 
     var prefix: String? = null
     @JvmField
-    var isInDeveloperMode = true
+    var isInDeveloperMode = false
 
     lateinit var generalAnnouncementChannel: GeneralAnnouncementChannel
 
     fun main(args: Array<String>) {
+
+        if(args.size >= 2){
+            if(args[0].startsWith("-dev")){
+                isInDeveloperMode = args[1].toBoolean()
+            }
+        }
 
         DB.primaryBackend = JsonBackend()
 
@@ -42,8 +45,8 @@ object Main{
 
         jda.presence.setPresence(Activity.playing("${prefix}help"), false)
 
-        jda.addEventListener(EventListener {
-            if(it is ReadyEvent) {
+        jda.addEventListener(EventListener { e ->
+            if(e is ReadyEvent) {
 
                 println("API is ready")
 
@@ -63,7 +66,7 @@ object Main{
 
                 //INIT
                 DB.getList<Tournament>(tournamentDbKey).list().forEach {
-                    TournamentInit.init(it)
+                    TournamentChangeObserver(it)
                 }
             }
 
