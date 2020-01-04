@@ -182,7 +182,7 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
         return t.run {
 
             val fields = mutableMapOf(
-                "Status" to status,
+                "Status" to status.displayName,
                 "Datum" to dateformat.format(dateFrom) + if(dateFrom != dateTo) "-"+dateformat.format(dateTo) else "",
                 "Ort" to location,
                 "Format" to "$format $division",

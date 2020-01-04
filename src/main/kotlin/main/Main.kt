@@ -2,7 +2,7 @@ package main
 
 import db.DB
 import db.Observable
-import db.TournamentListener
+import io.TournamentListener
 import json.JsonBackend
 import model.*
 import net.dv8tion.jda.api.JDA

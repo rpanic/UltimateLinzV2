@@ -1,5 +1,6 @@
-package db
+package io
 
+import db.DB
 import main.*
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.MessageBuilder
@@ -10,8 +11,12 @@ import tournament.tournamentDbKey
 import main.Prompt
 import java.util.*
 import model.Tournament
+import model.TournamentStatus
+import kotlin.contracts.contract
 
 class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
+    
+    val padding = 12
 
     @Permissioned("Vorstand", "Moderator")
     fun create(event: MessageReceivedEvent, args: Array<String>){
@@ -41,12 +46,14 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
     @Blocking
     fun editinfo(event: MessageReceivedEvent, msg: Array<String>) {
 
-        val (tournament, args) = parseDataWithTournament(msg).orElseThrow { ListenerAdapterCommandException("Tournament not found") }
+//        val (tournament, args) = parseDataWithTournament(msg).orElseThrow { ListenerAdapterCommandException("Tournament not found") }
 
-//        if (tournament == null) {
-//            send(event.channel, "Turnier nicht gefunden!")
-//            return
-//        }
+        val tournament = getTournament(msg, 2, event.message)
+
+        if (tournament == null) {
+            send(event.channel, "Turnier nicht gefunden!")
+            return
+        }
 
         var parameter: String? = null
 
@@ -108,6 +115,30 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
     @Permissioned("Vorstand", "Moderator")
     @Blocking
+    fun status(event: MessageReceivedEvent, msg: Array<String>){
+
+        val statuses = TournamentStatus.values().map { it.displayName }.joinToString(", ")
+        val definition = tournamentCommandDefinition("status", "Was ist der neue Status? $statuses")
+        val args = getInputData(event.message, definition, msg)
+
+        if(args.error != null){
+            send(event.channel, args.error)
+        }else{
+            args.args!!.apply {
+                val status = TournamentStatus.values().maxBy { it.displayName.similarity(parameters[0]) }
+                if(status != null) {
+                    tournament.status = status
+                    send(event.channel, "Status von ${tournament.name} zu ${tournament.status.displayName} gesetzt")
+                }else{
+                    send(event.channel, "Status nicht gefunden")
+                }
+            }
+        }
+
+    }
+
+    @Permissioned("Vorstand", "Moderator")
+    @Blocking
     fun archive(event: MessageReceivedEvent, msg: Array<String>) {
 
         val tournament = getTournament(msg, 2, event.message)
@@ -162,7 +193,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
                         cal.time = Date(tournament.dateFrom)
 
                         tournament.name = tournament.name + "-" + cal.get(Calendar.YEAR)
-                        channel.manager.setName(tournament.name?.replace(" ", "-") ?: "").complete()
+                        channel.manager.setName(tournament.name.replace(" ", "-")).complete()
 
                         send(event.channel, "Tournament " + tournament.name + " archived!")
                     }
@@ -200,20 +231,22 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 //
 //    }
 
-    private fun parseDataWithTournament(args: Array<String>): Optional<Pair<Tournament, Array<String>>>{
+    /*private fun parseDataWithTournament(args: Array<String>, channel: PrivateChannel): Pair<Tournament, Array<String>>{
 
         val tournaments = DB.getList<Tournament>(tournamentDbKey).list()
 
         var arg = args.maxBy { s -> tournaments.map { it.nameSimilarity(s) }.max() ?: 0 } ?: return Optional.empty()
 
-        var t = tournaments.maxBy { it.nameSimilarity(arg) } ?: return Optional.empty()
+        var t = tournaments.maxBy { it.nameSimilarity(arg) } ?: null
 
-        if(t.nameSimilarity(arg) < 4) return Optional.empty()
+        if(t?.nameSimilarity(arg) ?: 0 < 4){
+            val tournamentName = Prompt("Welches Turnier?", channel, channel.user).promptSync()
+        }
 
         val args2 = args.toMutableList()
         args2.remove(arg)
 
-        return Optional.of(Pair(t, args2.toTypedArray()))
+        return Pair(t, args2.toTypedArray())
 
     }
 
@@ -224,14 +257,18 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
         return s2.length * if(s1.contains(s2)) 1 else 0
 
-    }
+    }*/
+
+    private fun getInputData(message: Message, tournamentCommandDefinition: TournamentCommandDefinition, args: Array<String>) =
+        TournamentCommandParser(message.channel, message.author)
+            .getArgs(tournamentCommandDefinition, args.toList())
+
 
     private fun getTournament(args: Array<String>, index: Int, msg: Message): Tournament? {
 
         val findByName = {name: String ->
             DB.getList<Tournament>(tournamentDbKey).list()
-                .filter{ x -> x.name?.toLowerCase()?.startsWith(name.toLowerCase()) ?: false }
-                .firstOrNull()
+                .firstOrNull { x -> x.name.toLowerCase().startsWith(name.toLowerCase()) }
         }
 
         if (args.size > index) {
@@ -247,15 +284,16 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
     }
 
     override fun help(event: MessageReceivedEvent?, msg: Array<out String>?) {
-        val padding = 12
 
-        val info = ("Mit \"${this.cmd}\" erstellst und verwaltest du Turniere\n"
-                + "Alle verfügbaren Optionen:\n")
+        val info = ("""Mit \"${this.cmd}\" erstellst und verwaltest du Turniere
+            Standardschema:
+            `${this.cmd} command <turnier> <argumente>`
+            Alle verfügbaren Optionen:""".trimIndent())
 
         val commands = ("help".padRight(padding) + "Ruft die Hilfe auf\n"
                 + "create".padRight(padding) + "Erstellt ein neues Turnier\n"
+                + "edit".padRight(padding) + "Ändert die Infos eines Turniers\n"
                 + "info [x]".padRight(padding) + "Infos zu aktuellen Turnier [x = Turniername]\n"
-                + "editinfo".padRight(padding) + "Ändert die Infos eines Turniers\n"
                 + "list".padRight(padding) + "Listet alle erstellten Turniere\n"
                 + "archive".padRight(padding) + "Archiviert ein Turnier\n")
 

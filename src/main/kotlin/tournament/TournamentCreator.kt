@@ -68,8 +68,7 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
             println(roles.toString())
             if (roles.size > 0) {
 
-                val permissions = ArrayList<Permission>(
-                    listOf(
+                val permissions = listOf(
                         Permission.MESSAGE_ADD_REACTION,
                         Permission.VIEW_CHANNEL,
                         Permission.MESSAGE_WRITE,
@@ -79,7 +78,6 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
                         Permission.MESSAGE_ATTACH_FILES,
                         Permission.MESSAGE_EXT_EMOJI
                     )
-                )
 
                 val raw = Permission.getRaw(permissions)
 
