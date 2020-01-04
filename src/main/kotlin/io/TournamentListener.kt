@@ -19,6 +19,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
     val padding = 12
 
     @Permissioned("Vorstand", "Moderator")
+    @Help("Erstellt ein neues Turnier")
     fun create(event: MessageReceivedEvent, args: Array<String>){
 
         val channel: PrivateChannel
@@ -40,11 +41,12 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
     @Permissioned("Vorstand", "Moderator")
     @Blocking
+    @Help("Ändert die Infos eines Turniers")
     fun edit(event: MessageReceivedEvent, msg: Array<String>) = editinfo(event, msg)
 
     @Permissioned("Vorstand", "Moderator")
     @Blocking
-    fun editinfo(event: MessageReceivedEvent, msg: Array<String>) {
+    private fun editinfo(event: MessageReceivedEvent, msg: Array<String>) {
 
 //        val (tournament, args) = parseDataWithTournament(msg).orElseThrow { ListenerAdapterCommandException("Tournament not found") }
 
@@ -115,6 +117,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
     @Permissioned("Vorstand", "Moderator")
     @Blocking
+    @Help("Ändert den Status eines Turniers")
     fun status(event: MessageReceivedEvent, msg: Array<String>){
 
         val statuses = TournamentStatus.values().map { it.displayName }.joinToString(", ")
@@ -139,6 +142,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
     @Permissioned("Vorstand", "Moderator")
     @Blocking
+    @Help("Archiviert ein Turnier")
     fun archive(event: MessageReceivedEvent, msg: Array<String>) {
 
         val tournament = getTournament(msg, 2, event.message)
@@ -210,6 +214,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
     }
 
+    @Help("Listet alle erstellten Turniere")
     fun list(event: MessageReceivedEvent, msg: Array<String>) {
 
         val tournaments = DB.getList<Tournament>(tournamentDbKey).list()
@@ -283,25 +288,21 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
     }
 
-    override fun help(event: MessageReceivedEvent?, msg: Array<out String>?) {
+    override fun help(event: MessageReceivedEvent, msg: Array<out String>?) {
 
-        val info = ("""Mit \"${this.cmd}\" erstellst und verwaltest du Turniere
+        val info = ("""|
+            Mit \"${this.cmd}\" erstellst und verwaltest du Turniere
             Standardschema:
             `${this.cmd} command <turnier> <argumente>`
             Alle verfügbaren Optionen:""".trimIndent())
 
-        val commands = ("help".padRight(padding) + "Ruft die Hilfe auf\n"
-                + "create".padRight(padding) + "Erstellt ein neues Turnier\n"
-                + "edit".padRight(padding) + "Ändert die Infos eines Turniers\n"
-                + "info [x]".padRight(padding) + "Infos zu aktuellen Turnier [x = Turniername]\n"
-                + "list".padRight(padding) + "Listet alle erstellten Turniere\n"
-                + "archive".padRight(padding) + "Archiviert ein Turnier\n")
+        val commands = getHelp(event.jda.guilds[0], event.author)
 
         val messageBuilder = MessageBuilder()
         messageBuilder.append(info)
         messageBuilder.appendCodeBlock(commands, "")
 
-        send(event!!.channel, messageBuilder.build())
+        send(event.channel, messageBuilder.build())
 
         println("help")
     }

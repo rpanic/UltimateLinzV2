@@ -33,10 +33,10 @@ class WatchListenerAdapter : ListenerAdapterCommand("watch"){
 
     }
 
-    override fun help(event: MessageReceivedEvent, msg: Array<out String>?) {
-
-        event.channel.sendMessage("Options:\n-on\n-off").complete()
-
-    }
+//    override fun help(event: MessageReceivedEvent, msg: Array<out String>?) {
+//
+//        event.channel.sendMessage("Options:\n-on\n-off").complete()
+//
+//    }
 
 }
