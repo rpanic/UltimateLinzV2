@@ -4,6 +4,7 @@ FROM openjdk:8-jdk-slim as BUILD
 COPY *.gradle gradle.* gradlew /src/
 COPY gradle /src/gradle
 WORKDIR /src
+RUN chmod 777 gradlew
 RUN ./gradlew --version
 
 COPY . .
