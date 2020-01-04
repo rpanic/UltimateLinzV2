@@ -1,4 +1,4 @@
-package model
+package helper
 
 import kotlin.experimental.or
 
@@ -19,7 +19,7 @@ class StateObserverBuilder<T>{
         set = set or 2
     }
 
-    fun build() : StateObserver<T>{
+    fun build() : StateObserver<T> {
 
         val observer = object : StateObserver<T>(){
             val t = trigger

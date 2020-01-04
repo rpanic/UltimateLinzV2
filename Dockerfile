@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-slim as BUILD
+FROM openjdk:8-jdk-slim as builder
 
 # Get gradle distribution
 COPY *.gradle gradle.* gradlew /src/
