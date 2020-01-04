@@ -43,24 +43,19 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
     @Permissioned("Vorstand", "Moderator")
     @Blocking
     @Help("Ändert die Infos eines Turniers")
-    fun edit(event: MessageReceivedEvent, msg: Array<String>) = editinfo(event, msg)
+    fun edit(event: MessageReceivedEvent, msg: Array<String>) {
 
-    @Permissioned("Vorstand", "Moderator")
-    @Blocking
-    private fun editinfo(event: MessageReceivedEvent, msg: Array<String>) {
+        val definition = tournamentCommandDefinition("edit")
+        val args = getInputData(event.message, definition, msg)
 
-//        val (tournament, args) = parseDataWithTournament(msg).orElseThrow { ListenerAdapterCommandException("Tournament not found") }
-
-        val tournament = getTournament(msg, 2, event.message)
-
-        if (tournament == null) {
-            send(event.channel, "Turnier nicht gefunden!")
+        if(args.error != null){
+            send(event.channel, args.error)
             return
         }
 
         var parameter: String? = null
 
-        if (msg.size == 2) {
+        if (msg.size == 3) {
 
             var prompt = "Folgende Felder stehen zur Auswahl: \n"
             for (field in TournamentCreator.translations) {
@@ -102,7 +97,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
             }
 
-        } else if (msg.size > 2) {
+        } else if (msg.size > 3) {
 
             parameter = Arrays.stream(Arrays.copyOfRange(msg, 2, msg.size)).reduce { x, y -> "$x $y" }.orElse(null)
 
@@ -110,7 +105,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
         val value = Prompt("Neuer Wert?", event.channel, event.author).promptSync() //.setDelete(30000)
 
-        TournamentCreator.parseFieldInto(tournament, value, TournamentCreator.getFieldFromLabel(parameter!!)!!)
+        TournamentCreator.parseFieldInto(args.args!!.tournament, value, TournamentCreator.getFieldFromLabel(parameter!!)!!)
 
         /*MessageTimer.deleteAfter(*/sendSync(event.channel, "Feld $parameter gesetzt auf $value")//, 30000);
 

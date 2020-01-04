@@ -19,6 +19,9 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
     Message lastMessage;
 
     public ListenerAdapterCommand(String commandString) {
+        if(commandString.startsWith(cmdPrefix)){
+            commandString = commandString.replace(cmdPrefix, "");
+        }
         this.cmd = commandString;
         this.lastMessage = null;
     }
@@ -32,23 +35,18 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
 
         if(!event.getJDA().getSelfUser().equals(event.getAuthor())){
             if(channel.getType() == ChannelType.GROUP || channel.getType() == ChannelType.PRIVATE || channel.getType() == ChannelType.TEXT){
-                if(msg.startsWith(cmd) || msg.startsWith(cmdPrefix + cmd)){
+                if(msg.startsWith(cmdPrefix + cmd)){
 
-                    System.out.println("Message: " + event.getMessage().getContentDisplay() + " MessageId " + event.getMessageId());
+                    System.out.println("Command: " + event.getMessage().getContentDisplay() + " MessageId " + event.getMessageId());
                     lastMessage = event.getMessage();
                     try {
-                        boolean b = command(event, msg);
 
-                        if(!b){
-                            //TODO Command not recognized
-                        }
+                        command(event, msg);
+
                     } catch (Exception e){
                         event.getChannel().sendMessage("Ein Fehler ist aufgetreten - bitte wende dich an Raphael").complete();
                         event.getChannel().sendMessage(Stream.concat(Stream.of(e.getMessage()), Stream.of(e.getStackTrace())).limit(7).map(x -> x.toString()).reduce((x, y) -> x + "\n" + y).orElse("No stack trace")).complete();
                     }
-
-
-
                 }
             }
         }
@@ -110,9 +108,15 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
                     }
                 }else{
                     send(event.getChannel(), "Für diesen Befehl hast du nicht die nötigen Berechtigungen");
+                    return false;
                 }
             }
         }
+
+        send(event.getChannel(),
+                "Dieser Befehl wurde leider nicht gefunden\n"+
+                "Gib `" + cmdPrefix + this.cmd + "` ein, um die Hilfe anzuzeigen");
+
         return false;
     }
 
@@ -138,7 +142,7 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
 
         List<String> help = new ArrayList<>();
 
-        Collections.sort(methods, Comparator.comparing(Method::getName));
+        methods.sort(Comparator.comparing(Method::getName));
 
         for(Method m : methods){
 

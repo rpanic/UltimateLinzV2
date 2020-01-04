@@ -7,6 +7,7 @@ enum class TournamentStatus(val displayName: String) {
     NOT_SIGNED_UP("Nicht angemeldet"),
     SPOT("Spot bestätigt"),
     NO_SPOT("Kein Spot"),
-    OVER("Vorbei")
+    OVER("Vorbei"),
+    ARCHIVED("Archiviert")
 
 }

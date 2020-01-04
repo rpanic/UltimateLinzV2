@@ -45,6 +45,8 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
         participationEmoteLimiter = SimpleEmoteLimiter(infoM)
 
+        println("Constructed SimpleEmoteLimiter for ${t.name}: ${infoM.idLong}")
+
         val emotes = Main.jda.emotes.map { Pair(it.name, it) }.toMap()
         participationEmoteLimiter.emotes = listOfNotNull(emotes["in"], emotes["out"])
         participationEmoteLimiter.start(infoM.guild)

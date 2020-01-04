@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 
-class SimpleEmoteLimiter(val message: Message) : ListenerAdapter() {
+class SimpleEmoteLimiter(var message: Message) : ListenerAdapter() {
 
     var emotes = listOf<Emote>()
 
@@ -15,6 +15,8 @@ class SimpleEmoteLimiter(val message: Message) : ListenerAdapter() {
     lateinit var reactionsMap: MutableMap<User, Emote>
 
     fun start(guild: Guild){
+
+        message = message.channel.retrieveMessageById(message.idLong).complete()
 
         emotes.forEach { message.addReaction(it).queue() }
 
@@ -40,6 +42,8 @@ class SimpleEmoteLimiter(val message: Message) : ListenerAdapter() {
 
     override fun onMessageReactionAdd(event: MessageReactionAddEvent) {
 
+//        println("reactionAdd: ${event.messageIdLong} | ${message.idLong} | ${event.user.name}")
+
         if(event.messageIdLong == message.idLong && !event.user.isBot) {
 
             if (locked) {
@@ -56,10 +60,13 @@ class SimpleEmoteLimiter(val message: Message) : ListenerAdapter() {
                 //Remove all others
                 if(event.reaction.retrieveUsers().complete().contains(event.user)) {  //TODO Eventuell durch ein async repair ersetzen
 
+                    message = event.channel.retrieveMessageById(message.idLong).complete()
+
                     message.reactions.filter { it.reactionEmote.emote in emotes }
                         .filter { event.user in it.retrieveUsers().complete() }
                         .filter { it.reactionEmote.emoteOrEmojiName() != event.reactionEmote.emoteOrEmojiName() }
-                        .forEach { it.removeReaction(event.user).complete() }
+                        .forEach { it.removeReaction(event.user).queue() }
+
                 }
             }
         }
