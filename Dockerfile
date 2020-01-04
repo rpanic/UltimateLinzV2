@@ -10,6 +10,7 @@ RUN ./gradlew --version
 COPY . .
 ENV MAIN_CLASS_NAME=main.MainKt
 RUN chmod 777 gradlew
+RUN ./gradlew --no-daemon clean
 RUN ./gradlew --no-daemon jar
 
 FROM openjdk:8
