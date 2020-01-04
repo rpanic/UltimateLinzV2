@@ -24,11 +24,17 @@ object Main{
 
     var prefix: String? = null
     @JvmField
-    var isInDeveloperMode = true
+    var isInDeveloperMode = false
 
     lateinit var generalAnnouncementChannel: GeneralAnnouncementChannel
 
     fun main(args: Array<String>) {
+
+        if(args.size >= 2){
+            if(args[0].startsWith("-dev")){
+                isInDeveloperMode = args[1].toBoolean()
+            }
+        }
 
         DB.primaryBackend = JsonBackend()
 

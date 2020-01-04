@@ -15,7 +15,7 @@ import model.TournamentStatus
 import kotlin.contracts.contract
 
 class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
-    
+
     val padding = 12
 
     @Permissioned("Vorstand", "Moderator")
