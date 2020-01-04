@@ -40,6 +40,17 @@ fun String.padLeft(n: Int): String {
     return String.format("%1$" + n + "s", this)
 }
 
+fun String.completeUnique(options: Iterable<String>) : String?{
+    this.toLowerCase().apply {
+        val filtered = options.filter { it.startsWith(this) }
+        return if(filtered.size == 1){
+            filtered.firstOrNull()
+        }else{
+            null
+        }
+    }
+}
+
 fun isNull(obj: Any?) : Boolean{
     return obj == null
 }
