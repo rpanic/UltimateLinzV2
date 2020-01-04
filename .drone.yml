@@ -17,7 +17,7 @@ steps:
   - name: deploy
     commands:
       - docker volume create ultimatebotvolume || true
-      - docker run -d --name ultimatebot -v ultimatebotvolume:/app/data ultimatebot
+      - docker run -d --name ultimatebot -v ultimatebotvolume:/app ultimatebot
 
 trigger:
   branch:

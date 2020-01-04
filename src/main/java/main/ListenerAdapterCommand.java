@@ -159,7 +159,7 @@ public abstract class ListenerAdapterCommand extends ListenerAdapter{
 
             if(permission) {
                 Help helpAnnotation = m.getAnnotation(Help.class);
-                String prefix = UtilsKt.padRight(m.getName(), padding);
+                String prefix = UtilsKt.padRight("-" + m.getName(), padding);
                 if (helpAnnotation != null) {
                     help.add(prefix + helpAnnotation.value());
                 } else {
