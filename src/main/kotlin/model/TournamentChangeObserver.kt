@@ -60,7 +60,7 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
         this.all(Tournament::announcementChannel, "")
 
-        this.status(t.status)
+        setLimiterLocked(t.status)
 
     }
 
@@ -127,7 +127,31 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
         //Alle Teilnehmer benachrichtigen
 
-        val status = new as? TournamentStatus
+        val status = new as? TournamentStatus ?: return
+        setLimiterLocked(status)
+
+        if(status in listOf(
+                TournamentStatus.SIGNED_UP,
+                TournamentStatus.NOT_SIGNED_UP,
+                TournamentStatus.SPOT,
+                TournamentStatus.NO_SPOT
+            )){
+
+            announcementChannel.sendMessage(status.displayName).complete()
+
+            val userMessage = "${t.name}: ${status.displayName}"
+
+            participationEmoteLimiter.reactionsMap
+                .filter { it.value ==  Main.jda.emotes.find { f -> f.name == "in" } }
+                .forEach { (u, _) -> u.openPrivateChannel().queue { c ->
+                    c.sendMessage(userMessage).queue()
+                } }
+
+        }
+
+    }
+
+    private fun setLimiterLocked(status: TournamentStatus){
         val locked = if(status in listOf(
                 TournamentStatus.NOT_SIGNED_UP,
                 TournamentStatus.SPOT,
@@ -148,7 +172,6 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
         participationEmoteLimiter.locked = locked
         eatingEmoteLimiter?.locked = locked
-
     }
 
     fun all(prop: KProperty<*>, new: Any){
