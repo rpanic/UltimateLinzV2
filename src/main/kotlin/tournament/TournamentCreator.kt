@@ -2,6 +2,7 @@ package tournament
 
 import db.DB
 import main.parseDateLazy
+import main.yesNo
 import model.Tournament
 import model.TournamentChangeObserver
 import net.dv8tion.jda.api.Permission
@@ -245,16 +246,7 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
                         } else if (m.parameters[0].type.name == Boolean::class.javaPrimitiveType!!.name) {
 
                             if(value != null){
-                                val booleaned = value.run {
-                                    when {
-                                        startsWith("y") -> true
-                                        startsWith("j") -> true
-                                        startsWith("t") -> true
-                                        startsWith("n") -> false
-                                        startsWith("f") -> false
-                                        else -> null
-                                    }
-                                }
+                                val booleaned = value.yesNo()
                                 if(booleaned != null)
                                     m.invoke(t, booleaned)
                                 else

@@ -40,6 +40,17 @@ fun String.padLeft(n: Int): String {
     return String.format("%1$" + n + "s", this)
 }
 
+fun String.yesNo() : Boolean?{
+    return when {
+        startsWith("y") -> true
+        startsWith("j") -> true
+        startsWith("t") -> true
+        startsWith("n") -> false
+        startsWith("f") -> false
+        else -> null
+    }
+}
+
 fun String.completeUnique(options: Iterable<String>) : String?{
     this.toLowerCase().apply {
         val filtered = options.filter { it.startsWith(this) }

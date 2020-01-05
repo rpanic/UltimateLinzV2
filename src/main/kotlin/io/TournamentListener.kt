@@ -160,8 +160,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
                 response = response!!.toLowerCase()
 
-                if (response.startsWith("y") || response.startsWith("j")) {
-
+                if (response.yesNo() == true) {
 
                     //Removal operations
 
