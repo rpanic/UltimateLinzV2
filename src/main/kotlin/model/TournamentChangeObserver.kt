@@ -207,7 +207,6 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
             if (message != null) {
 
                 message.editMessage(buildInfoMessage()).complete()
-//                message.editMessage(buildEmbed()).complete()
 
             } else {
                 System.err.println("TournamentChangeListener - Message not found")
@@ -216,6 +215,24 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
         } else {
             System.err.println("TournamentChangeListener - Channel not found")
+        }
+
+        val generalChannel = Main.jda.getTextChannelById(Main.generalAnnouncementChannel.channelId)
+
+        if (generalChannel != null) {
+            val message = generalChannel.retrieveMessageById(t.generalAnnouncementChannelMessage).complete()
+
+            if (message != null) {
+
+                message.editMessage(buildGeneralInfoMessage()).complete()
+
+            } else {
+                System.err.println("TournamentChangeListener - GeneralMessage not found")
+                Thread.dumpStack()
+            }
+
+        } else {
+            System.err.println("TournamentChangeListener - General Channel not found")
         }
 
 
@@ -279,7 +296,7 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
     private fun buildGeneralInfoMessage(): Message {
 
         return MessageBuilder()
-            .append(".\n")
+            .append("${t.name}\n")
             .append(Main.jda.getTextChannelById(t.announcementChannel) as IMentionable)
             .append("\n" + buildInfoMessage() + "\n")
             .build()

@@ -55,7 +55,7 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
         var parameter: String? = null
 
-        if (msg.size == 3) {
+        if (msg.size == 2) {
 
             var prompt = "Folgende Felder stehen zur Auswahl: \n"
             for (field in TournamentCreator.translations) {
