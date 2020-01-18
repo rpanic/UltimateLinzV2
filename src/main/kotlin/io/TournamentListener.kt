@@ -227,6 +227,22 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
 
     }
 
+    @Help("Füge einen nicht registriertern Spieler zu einem Turnier hinzu")
+    fun player(event: MessageReceivedEvent, msg: Array<String>) {
+
+        val definition = tournamentCommandDefinition("player", "Wie ist der Name des Spielers?")
+        val args = getInputData(event.message, definition, msg)
+
+        if(args.error != null){
+            send(event.channel, args.error)
+        }else{
+
+            
+
+        }
+
+    }
+
     //TODO
 //    @Permissioned("Vorstand", "Moderator")
 //    fun activateEating(event: MessageReceivedEvent?, msg: Array<out String>?){

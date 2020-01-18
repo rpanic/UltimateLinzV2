@@ -1,8 +1,6 @@
 package model
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import db.Observable
-import java.text.SimpleDateFormat
 
 class Tournament : Observable(){
 

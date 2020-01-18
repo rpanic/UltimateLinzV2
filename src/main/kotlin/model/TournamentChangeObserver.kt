@@ -14,8 +14,10 @@ import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
+import net.dv8tion.jda.api.exceptions.ErrorResponseException
 import watch.linkWatchToLimiter
 import java.awt.Color
+import java.lang.Exception
 import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -28,6 +30,8 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
     var announcementChannel: TextChannel
 
     var eatingEmoteLimiter: SimpleEmoteLimiter? = null
+
+    lateinit var messageObserver: AsciiMessageObserver
 
     init {
 
@@ -66,32 +70,48 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
     private fun initParticipationTable(limiter: SimpleEmoteLimiter, newc: TextChannel) {
 
-        val tableMessage = newc.retrieveMessageById(t.tableMessage).complete()
+        val tableMessage = try {
+            newc.retrieveMessageById(t.tableMessage).complete()
+        }catch (e: ErrorResponseException){
+            var msg = newc.sendMessage("Table").complete()
+            t.tableMessage = msg.idLong
+            msg
+        }
 
-        limiter.addEmoteListener(object: EmoteListener {
+        if(tableMessage != null) {
 
-            val messageObserver = AsciiMessageObserver(tableMessage)
+            messageObserver = AsciiMessageObserver(tableMessage)
 
-            init {
+            limiter.addEmoteListener(object : EmoteListener {
 
-                limiter.getReactionsByUser().forEach { (u, e) ->
-                    messageObserver.answerChanged(u.nickName(newc.guild), e.name)
+                init {
+
+                    limiter.getReactionsByUser().forEach { (u, e) ->
+                        messageObserver.answerChanged(u.nickName(newc.guild), e.name)
+                    }
+                    messageObserver.editMessage()
                 }
-                messageObserver.editMessage()
-            }
 
-            override fun emoteAdd(e: MessageReactionAddEvent, limiter: SimpleEmoteLimiter) {
-                println("EmoteAdd ${e.user} ${e.reactionEmote.name}")
-                messageObserver.answerChanged(e.user.nickName(tableMessage.guild), limiter.getReactionsByUser()[e.user]?.name ?: "none")
-            }
+                override fun emoteAdd(e: MessageReactionAddEvent, limiter: SimpleEmoteLimiter) {
+                    println("EmoteAdd ${e.user} ${e.reactionEmote.name}")
+                    messageObserver.answerChanged(
+                        e.user.nickName(tableMessage.guild),
+                        limiter.getReactionsByUser()[e.user]?.name ?: "none"
+                    )
+                }
 
-            override fun emoteRemove(e: MessageReactionRemoveEvent, limiter: SimpleEmoteLimiter) {
-                println("EmoteRemove ${e.user} ${e.reactionEmote.name}")
-                messageObserver.answerChanged(e.user.nickName(tableMessage.guild), limiter.getReactionsByUser()[e.user]?.name ?: "none")
-            }
-        })
+                override fun emoteRemove(e: MessageReactionRemoveEvent, limiter: SimpleEmoteLimiter) {
+                    println("EmoteRemove ${e.user} ${e.reactionEmote.name}")
+                    messageObserver.answerChanged(
+                        e.user.nickName(tableMessage.guild),
+                        limiter.getReactionsByUser()[e.user]?.name ?: "none"
+                    )
+                }
+            })
 
-        linkWatchToLimiter(limiter)
+            linkWatchToLimiter(limiter)
+
+        }
     }
 
     fun eatingEnabled(new: Any){
