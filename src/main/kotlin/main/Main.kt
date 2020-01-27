@@ -2,6 +2,7 @@ package main
 
 import db.DB
 import db.Observable
+import helper.DummyTournamentCreator
 import io.TournamentListener
 import json.JsonBackend
 import model.*
@@ -49,6 +50,8 @@ object Main{
                 println("API is ready")
 
                 generalAnnouncementChannel = DB.getObject("generalAnnouncementChannel"){
+                    println("General Announcement channel not existing, creating a new one")
+
                     val guild = jda.guilds[0]
 
                     //todo Check if the channel already exists
@@ -63,9 +66,12 @@ object Main{
                 GeneralAnnouncementChannelImposer(generalAnnouncementChannel)
 
                 //INIT
-                DB.getList<Tournament>(tournamentDbKey).list().forEach {
+                val tournaments = DB.getList<Tournament>(tournamentDbKey)
+                tournaments.list().forEach {
                     TournamentChangeObserver(it)
                 }
+
+                tournaments.addListener(TournamentListSortObserver())
             }
 
         })
@@ -74,6 +80,7 @@ object Main{
         jda.addEventListener(WatchListenerAdapter())
         jda.addEventListener(LogonStatisticsListenerAdapter())
         jda.addEventListener(HelpListenerAdapter())
+        jda.addEventListener(DummyTournamentCreator())
 
     }
 

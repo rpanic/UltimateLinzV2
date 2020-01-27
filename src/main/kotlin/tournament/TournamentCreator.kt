@@ -126,6 +126,8 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
 
         TournamentChangeObserver(t)
 
+        DB.getList<Tournament>(tournamentDbKey).add(t)
+
     }
 
     fun nextQuestion() {
@@ -149,11 +151,9 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
             channel.sendMessage(t.toString()).complete()
             channel.jda.removeEventListener(this)
 
-            t.id = DB.getList<Tournament>(tournamentDbKey).list().map{ x -> x.id}.max() ?: -1 + 1;
+            t.id = DB.getList<Tournament>(tournamentDbKey).list().map{ x -> x.id}.max() ?: -1 + 1
 
             createAction(channel.jda.guilds[0], t)
-
-            DB.getList<Tournament>(tournamentDbKey).add(t)
 
         } else {
 
@@ -189,7 +189,7 @@ class TournamentCreator(internal var channel: PrivateChannel) : ListenerAdapter(
             "playersFee",
             "registrationDeadline",
             "paymentDeadline",
-            "uclink",
+            "ucLink",
             "eatingEnabled"
         )
         val nonCreationFields = arrayOf("schedule", "playersinfo", "comment")
