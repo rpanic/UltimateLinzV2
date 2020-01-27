@@ -12,6 +12,7 @@ import main.Prompt
 import java.util.*
 import model.Tournament
 import model.TournamentStatus
+import java.lang.RuntimeException
 import kotlin.contracts.contract
 
 @Help("Alle Commands zur Turnierinfo und -verwaltung")
@@ -45,7 +46,18 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
     @Help("Ändert die Infos eines Turniers")
     fun edit(event: MessageReceivedEvent, msg: Array<String>) {
 
-        val definition = tournamentCommandDefinition("edit")
+        var prompt = "Folgende Felder stehen zur Auswahl: \n"
+        for (field in TournamentCreator.translations) {
+
+            val arr = field.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+
+            prompt += String.format(" - %s: %s\n", arr[0], arr[1])
+
+        }
+        prompt += "Welches Infofeld willst du ändern?"
+
+
+        val definition = tournamentCommandDefinition("edit", prompt)
         val args = getInputData(event.message, definition, msg)
 
         if(args.error != null){
@@ -53,61 +65,34 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
             return
         }
 
-        var parameter: String? = null
+        var parameter = args.args!!.parameters[0]
 
-        if (msg.size == 2) {
+        val existsCheck = {param: String ->
+            TournamentCreator.translations
+            .map { x -> x.split("-").dropLastWhile { it.isEmpty() }.first() }
+            .any { x -> x.startsWith(param, true) }
+        }
 
-            var prompt = "Folgende Felder stehen zur Auswahl: \n"
-            for (field in TournamentCreator.translations) {
+        if (!existsCheck(parameter)) {
 
-                val arr = field.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            parameter = Prompt(
+                "Feld existiert nicht - du kannst nochmal probieren",
+                event.channel,
+                event.author
+            ).promptSync() ?: throw RuntimeException("Something went wrong while waiting for user input")
 
-                prompt += String.format(" - %s: %s\n", arr[0], arr[1])
-
+            if (!existsCheck(parameter)) {
+                send(event.channel, "Abbruch")
+                return
             }
-            prompt += "Welches Infofeld willst du ändern?"
-
-            parameter = Prompt(prompt, event.channel, event.author).promptSync() //setDelete(30000).
-
-            println("Param: $parameter")
-
-            var exists = TournamentCreator.translations
-                .map { x -> x.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] }
-                .any { x -> x.startsWith(parameter!!.toLowerCase()) }
-
-            if (!exists) {
-
-                parameter = Prompt(
-                    "Feld existiert nicht - du kannst nochmal probieren",
-                    event.channel,
-                    event.author
-                ).promptSync() //.setDelete(30000)
-
-                val finalParameter2 = parameter
-
-                exists = Arrays.stream(TournamentCreator.translations)
-                    .map { x -> x.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] }
-                    .anyMatch { x -> x.startsWith(finalParameter2!!.toLowerCase()) }
-
-                if (!exists) {
-                    val m = event.channel.sendMessage("Abbruch").complete()
-//                    MessageTimer.deleteAfter(m, 20000)
-                    return
-                }
-
-            }
-
-        } else if (msg.size > 3) {
-
-            parameter = Arrays.stream(Arrays.copyOfRange(msg, 2, msg.size)).reduce { x, y -> "$x $y" }.orElse(null)
 
         }
 
-        val value = Prompt("Neuer Wert?", event.channel, event.author).promptSync() //.setDelete(30000)
+        val value = Prompt("Neuer Wert?", event.channel, event.author).promptSync()
 
-        TournamentCreator.parseFieldInto(args.args!!.tournament, value, TournamentCreator.getFieldFromLabel(parameter!!)!!)
+        TournamentCreator.parseFieldInto(args.args.tournament, value, TournamentCreator.getFieldFromLabel(parameter)!!)
 
-        /*MessageTimer.deleteAfter(*/sendSync(event.channel, "Feld $parameter gesetzt auf $value")//, 30000);
+        sendSync(event.channel, "Feld $parameter gesetzt auf $value")
 
     }
 
