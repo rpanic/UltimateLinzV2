@@ -10,14 +10,22 @@ steps:
   - name: build
     commands:
       - docker build -t ultimatebot .
-  - name: cleanup
+  - name: cleanup dev
     commands:
-      - docker stop ultimatebot || true
-      - docker rm ultimatebot || true
-  - name: deploy
+      - docker stop ultimatebotdev || true
+      - docker rm ultimatebotdev || true
+  - name: deploy dev
     commands:
-      - docker volume create ultimatebotvolume || true
-      - docker run -d --name ultimatebot -v ultimatebotvolume:/app ultimatebot
+      - docker volume create ultimatedevvolume || true
+      - docker run -d --name ultimatebotdev -v ultimatedevvolume:/app/data ultimatebot
+  - name: cleanup prod
+    commands:
+      - docker stop ultimatebotprod || true
+      - docker rm ultimatebotprod || true
+  - name: deploy prod
+    commands:
+      - docker volume create ultimateprodvolume || true
+      - docker run -d --name ultimatebotprod -v ultimateprodvolume:/app/data ultimatebot
 
 trigger:
   branch:
