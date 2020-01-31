@@ -16,6 +16,9 @@ import tournament.tournamentDbKey
 import watch.LogonStatisticsListenerAdapter
 import watch.WatchListenerAdapter
 import java.io.FileNotFoundException
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.lang.RuntimeException
 
 object Main{
 
@@ -67,8 +70,29 @@ object Main{
 
                 //INIT
                 val tournaments = DB.getList<Tournament>(tournamentDbKey)
+
+                val invalidTournaments = DB.getList<Tournament>("invalidTournaments")
+
+                //Check integrity of the data and throw away invalid records
                 tournaments.list().forEach {
-                    TournamentChangeObserver(it)
+                    if(jda.getTextChannelById(it.announcementChannel) == null){
+                        tournaments.remove(it)
+                        invalidTournaments += it
+                        postToDevNotifications("AnnouncementChannel for Tournament ${it.name} got deleted, removing it from active tournaments")
+                    }
+                }
+
+                tournaments.list().forEach {
+                    try {
+                        TournamentChangeObserver(it)
+                    }catch(e: Exception){
+                        println("An exception occured while initializing Tournament ${it.name}")
+                        e.printStackTrace()
+
+                        postToDevNotifications(".\nAn exception occured while initializing Tournament ${it.name}\n" +
+                                StringWriter().apply { e.printStackTrace(PrintWriter(this)) }
+                                    .toString().split("\n").take(4).joinToString("\n"))
+                    }
                 }
 
                 tournaments.addListener(TournamentListSortObserver())

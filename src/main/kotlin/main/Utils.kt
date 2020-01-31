@@ -5,6 +5,8 @@ import net.dv8tion.jda.api.entities.MessageReaction
 import net.dv8tion.jda.api.entities.User
 import org.apache.commons.lang3.time.DateUtils
 import java.io.File
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.util.*
 
 fun <R> (() -> R).then(f: () -> R): () -> R {
@@ -86,3 +88,7 @@ fun MessageReaction.ReactionEmote.emoteOrEmojiName() = if(isEmoji) emoji else em
 fun User.getMember(g: Guild) = g.getMemberById(idLong)
 
 fun User.nickName(g: Guild) = getMember(g)?.effectiveName
+
+fun postToDevNotifications(s: String){
+    Main.jda.getTextChannelsByName("dev-notifications", true).firstOrNull()?.sendMessage(s)?.complete()
+}
