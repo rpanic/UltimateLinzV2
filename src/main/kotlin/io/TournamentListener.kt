@@ -199,13 +199,17 @@ class TournamentListener : ListenerAdapterCommand("${Main.prefix}t") {
     @Help("Listet alle erstellten Turniere")
     fun list(event: MessageReceivedEvent, msg: Array<String>) {
 
-        val tournaments = DB.getList<Tournament>(tournamentDbKey).list()
+        var tournaments = DB.getList<Tournament>(tournamentDbKey).list()
+
+        if(msg.size > 2 && msg[2] == "active"){
+            tournaments = tournaments.filter { it.status in listOf(TournamentStatus.OVER, TournamentStatus.SIGNED_UP, TournamentStatus.SPOT) }
+        }
 
         System.out.println(tournaments.size)
 
         val s = "Created Tournaments: \n" + tournaments
             .sortedBy { it.dateFrom }
-            .map(Tournament::name)
+            .map{"${it.name} - ${it.status.displayName}"}
             .has( {size > 0} , "Keine Turniere zurzeit verfuegbar"){ reduce { x, y -> x + "\n" + y } }
 
         event.channel.sendMessage(MessageBuilder().appendCodeBlock(s, "").build()).complete()
