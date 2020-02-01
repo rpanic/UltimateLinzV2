@@ -169,6 +169,17 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
 
         }
 
+        if(status in listOf(
+                TournamentStatus.OVER,
+                TournamentStatus.ARCHIVED,
+                TournamentStatus.NOT_SIGNED_UP,
+                TournamentStatus.NO_SPOT
+            )){
+            Main.jda.getTextChannelById(Main.generalAnnouncementChannel.channelId)!!
+                .retrieveMessageById(t.generalAnnouncementChannelMessage).complete()
+                ?.delete()?.queue()
+        }
+
     }
 
     private fun setLimiterLocked(status: TournamentStatus){
@@ -220,17 +231,19 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
         val generalChannel = Main.jda.getTextChannelById(Main.generalAnnouncementChannel.channelId)
 
         if (generalChannel != null) {
-            val message = generalChannel.retrieveMessageById(t.generalAnnouncementChannelMessage).complete()
+            if(t.status !in listOf(TournamentStatus.OVER, TournamentStatus.NOT_SIGNED_UP, TournamentStatus.NO_SPOT)) {
 
-            if (message != null) {
+                val message = generalChannel.retrieveMessageById(t.generalAnnouncementChannelMessage).complete()
 
-                message.editMessage(buildGeneralInfoMessage()).complete()
+                if (message != null) {
 
-            } else {
-                System.err.println("TournamentChangeListener - GeneralMessage not found")
-                Thread.dumpStack()
+                    message.editMessage(buildGeneralInfoMessage()).complete()
+
+                } else {
+                    System.err.println("TournamentChangeListener - GeneralMessage not found")
+                    Thread.dumpStack()
+                }
             }
-
         } else {
             System.err.println("TournamentChangeListener - General Channel not found")
         }
