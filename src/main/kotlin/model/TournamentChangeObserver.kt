@@ -6,6 +6,7 @@ import helper.SimpleEmoteLimiter
 import main.AsciiMessageObserver
 import main.Main
 import main.nickName
+import main.postToDevNotifications
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.entities.IMentionable
@@ -14,6 +15,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
+import net.dv8tion.jda.api.exceptions.ContextException
 import net.dv8tion.jda.api.exceptions.ErrorResponseException
 import watch.linkWatchToLimiter
 import java.awt.Color
@@ -233,15 +235,19 @@ class TournamentChangeObserver(t: Tournament) : ChangeObserver<Tournament>(t){
         if (generalChannel != null) {
             if(t.status !in listOf(TournamentStatus.OVER, TournamentStatus.NOT_SIGNED_UP, TournamentStatus.NO_SPOT)) {
 
-                val message = generalChannel.retrieveMessageById(t.generalAnnouncementChannelMessage).complete()
+                try {
+                    val message = generalChannel.retrieveMessageById(t.generalAnnouncementChannelMessage).complete()
 
-                if (message != null) {
+                    if (message != null) {
 
-                    message.editMessage(buildGeneralInfoMessage()).complete()
+                        message.editMessage(buildGeneralInfoMessage()).complete()
 
-                } else {
-                    System.err.println("TournamentChangeListener - GeneralMessage not found")
-                    Thread.dumpStack()
+                    } else {
+                        System.err.println("TournamentChangeListener - GeneralMessage not found")
+                        Thread.dumpStack()
+                    }
+                } catch (e: ContextException){
+                    postToDevNotifications("Tournament was set to ${t.status}, but AnnouncementMessage was already deleted")
                 }
             }
         } else {
