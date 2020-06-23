@@ -1,7 +1,6 @@
 package main
 
 import db.DB
-import db.Observable
 import helper.DummyTournamentCreator
 import io.TournamentListener
 import json.JsonBackend
@@ -90,9 +89,16 @@ object Main{
                         println("An exception occured while initializing Tournament ${it.name}")
                         e.printStackTrace()
 
+                        val stack = StringWriter().apply { e.printStackTrace(PrintWriter(this)) }
+                            .toString().split("\n")
+                        val shortenedStack = mutableListOf<String>()
+                        shortenedStack += stack.take(2)
+                        shortenedStack += stack.takeLast(stack.size - 2) //Remove first two
+                            .takeIf { listOf("main", "helper", "io", "main", "model", "tournament", "watch").any { pkg -> it.contains(pkg) } } ?: listOf()
+                                //No the best solution, i guess a common main package like org.ultimatelinz would be in place
+
                         postToDevNotifications(".\nAn exception occured while initializing Tournament ${it.name}\n" +
-                                StringWriter().apply { e.printStackTrace(PrintWriter(this)) }
-                                    .toString().split("\n").take(4).joinToString("\n"))
+                                    shortenedStack.joinToString("\n"))
                     }
                 }
 
