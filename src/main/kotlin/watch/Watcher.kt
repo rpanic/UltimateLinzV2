@@ -1,5 +1,5 @@
 package watch
 
-import db.Observable
+import observable.Observable
 
 class Watcher(val id: Long) : Observable()

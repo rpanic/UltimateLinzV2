@@ -1,6 +1,6 @@
 package model
 
-import db.Observable
+import observable.Observable
 
 class Tournament : Observable(){
 

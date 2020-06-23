@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
+import observable.Observable
 import tournament.tournamentDbKey
 import watch.LogonStatisticsListenerAdapter
 import watch.WatchListenerAdapter
@@ -76,7 +77,7 @@ object Main{
                 //Check integrity of the data and throw away invalid records
                 tournaments.list().forEach {
                     if(jda.getTextChannelById(it.announcementChannel) == null){
-                        invalidTournaments += it
+                        invalidTournaments.add(it)
                         tournaments.remove(it)
                         postToDevNotifications("AnnouncementChannel for Tournament ${it.name} got deleted, removing it from active tournaments")
                     }
