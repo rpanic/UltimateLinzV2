@@ -29,7 +29,9 @@ class WatchListenerAdapter : ListenerAdapterCommand("watch"){
     @Permissioned("Vorstand", "Moderator")
     fun off(event: MessageReceivedEvent, msg: Array<String>){
 
-        watchers.remove(watchers.find { it.id == event.author.idLong })
+        watchers.find { it.id == event.author.idLong }?.apply {
+            watchers.remove(this)
+        }
 
         event.channel.sendMessage("Watching turned off").complete()
 

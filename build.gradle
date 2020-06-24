@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compile 'com.github.rpanic:ImposterDB:-SNAPSHOT'
+    compile 'com.github.rpanic:ImposterDB:849f11c3d5'
 //    implementation 'com.jessecorbett:diskord-jvm:1.4.1'
 //    compile 'com.beust:klaxon:5.2'
     compile ('net.dv8tion:JDA:4.0.0_39'){

@@ -1,11 +1,11 @@
 package model
 
-import db.Observable
+import observable.Observable
 
 class GeneralAnnouncementChannel()
     : Observable() {
 
     var channelId: Long by observable(-1)
-    var tournamentMessages: MutableList<Long> by observableList()
+    var tournamentMessages by observableList<Long>()
 
 }

@@ -1,7 +1,6 @@
 package main
 
 import db.DB
-import db.Observable
 import helper.DummyTournamentCreator
 import io.TournamentListener
 import json.JsonBackend
@@ -12,6 +11,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.hooks.EventListener
+import observable.Observable
 import tournament.tournamentDbKey
 import watch.LogonStatisticsListenerAdapter
 import watch.WatchListenerAdapter
@@ -76,7 +76,7 @@ object Main{
                 //Check integrity of the data and throw away invalid records
                 tournaments.list().forEach {
                     if(jda.getTextChannelById(it.announcementChannel) == null){
-                        invalidTournaments += it
+                        invalidTournaments.add(it)
                         tournaments.remove(it)
                         postToDevNotifications("AnnouncementChannel for Tournament ${it.name} got deleted, removing it from active tournaments")
                     }
@@ -89,9 +89,16 @@ object Main{
                         println("An exception occured while initializing Tournament ${it.name}")
                         e.printStackTrace()
 
+                        val stack = StringWriter().apply { e.printStackTrace(PrintWriter(this)) }
+                            .toString().split("\n")
+                        val shortenedStack = mutableListOf<String>()
+                        shortenedStack += stack.take(2)
+                        shortenedStack += stack.takeLast(stack.size - 2) //Remove first two
+                            .takeIf { listOf("main", "helper", "io", "main", "model", "tournament", "watch").any { pkg -> it.contains(pkg) } } ?: listOf()
+                                //No the best solution, i guess a common main package like org.ultimatelinz would be in place
+
                         postToDevNotifications(".\nAn exception occured while initializing Tournament ${it.name}\n" +
-                                StringWriter().apply { e.printStackTrace(PrintWriter(this)) }
-                                    .toString().split("\n").take(4).joinToString("\n"))
+                                    shortenedStack.joinToString("\n"))
                     }
                 }
 

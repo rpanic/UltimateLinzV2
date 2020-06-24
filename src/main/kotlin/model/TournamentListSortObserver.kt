@@ -1,16 +1,17 @@
 package model
 
 import db.DB
-import db.ElementChangeType
-import db.ElementChangedListener
 import main.Main
+import observable.ElementChangedListener
+import observable.LevelInformation
+import observable.ListChangeArgs
 import tournament.tournamentDbKey
 
 class TournamentListSortObserver : ElementChangedListener<Tournament> {
 
-    override fun invoke(changeType: ElementChangeType, t: Tournament) {
+    override fun invoke(p1: ListChangeArgs<Tournament>, p2: LevelInformation) {
 
-        println("ListChanged $changeType ${t.name}")
+        println("ListChanged ${p1.elementChangeType} ${p1.elements.firstOrNull()?.name}")
         sort()
 
     }

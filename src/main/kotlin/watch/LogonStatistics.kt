@@ -2,7 +2,6 @@ package watch
 
 import db.ChangeObserver
 import db.DB
-import db.Observable
 import main.*
 import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.OnlineStatus
@@ -12,6 +11,7 @@ import net.dv8tion.jda.api.events.user.update.UserUpdateOnlineStatusEvent
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
+import observable.Observable
 
 class Login(val user: Long, val time: Long, val status: String) : Observable()
 
@@ -24,7 +24,7 @@ class LogonStatisticsListenerAdapter : ListenerAdapterCommand("login"){
 
         logins.add(Login(event.user.idLong, System.currentTimeMillis(), event.newOnlineStatus.name))
 
-        if(logins.size > 10000){
+        if(logins.size > 1000){
             logins.removeAt(0)
         }
 
